@@ -118,7 +118,7 @@ export default function ItemForm({
         disabled={!name.trim()}
         style={{
           backgroundColor: name.trim() ? "#28a745" : "#c8e6c9",
-          color: "white",
+          color: "gray",
           border: "none",
           padding: "8px 16px",
           borderRadius: "4px",
@@ -137,7 +137,7 @@ export default function ItemForm({
           onClick={handleCancel}
           style={{
             backgroundColor: "#6c757d",
-            color: "white",
+            color: "gray",
             border: "none",
             padding: "8px 16px",
             borderRadius: "4px",

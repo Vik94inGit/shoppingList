@@ -1,212 +1,162 @@
-// src/components/shoppingList/ItemRow.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
-import { useShoppingList } from "../../context/shoppingListContext";
+import { useShoppingList } from "../../context/ShoppingListContext";
 
-/**
- * ITEMROW – Renders a single shopping item with edit/remove controls
- *
- * Props:
- *   item       → { itemId, itemName, count, isResolved }
- *   isManager  → true if user can edit/remove (owner or member)
- *   dispatch   → context dispatch to send actions to reducer
- */
 export default function ItemRow({ item, isManager }) {
-  // -------------------------------------------------
-  // 1. LOCAL STATE – for inline editing
-  // -------------------------------------------------
-  const [isEditing, setIsEditing] = useState(false); // Are we in edit mode?
-  const [editName, setEditName] = useState(item.itemName); // Temp name
-  const [editCount, setEditCount] = useState(item.count); // Temp count
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.itemName);
+  const [editCount, setEditCount] = useState(item.count);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  // ← Wrap in useCallback to stabilize reference
+  const handleClickOutside = useCallback((event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setIsMenuOpen(false);
+    }
+  }, []); // ← No dependencies! setIsMenuOpen is stable
 
-  const { listData, dispatch, userId } = useShoppingList();
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleClickOutside]); // ← Only re-subscribe if handler changes
+  const { dispatch } = useShoppingList();
 
-  // -------------------------------------------------
-  // 2. DEFENSIVE CHECK – prevent crash on bad data
-  // -------------------------------------------------
-  if (!item || !item.itemId) {
-    console.warn("[ItemRow] Invalid or missing item:", item);
-    return null; // Skip rendering
-  }
-
-  // Destructure item for easier access
+  if (!item || !item.itemId) return null;
   const { itemId, itemName, count, isResolved } = item;
 
-  // -------------------------------------------------
-  // 3. ACTION HANDLERS – send to reducer via dispatch
-  // -------------------------------------------------
   const handleToggle = () => {
-    dispatch({
-      type: "TOGGLE_ITEM_RESOLVED",
-      payload: { itemId },
-    });
+    dispatch({ type: "TOGGLE_ITEM_RESOLVED", payload: { itemId } });
   };
 
   const handleSave = () => {
     const trimmedName = editName.trim();
-    if (!trimmedName) {
-      console.warn("[ItemRow] Empty name → abort save");
-      return;
-    }
-
+    if (!trimmedName) return;
     dispatch({
       type: "UPDATE_ITEM",
       payload: { itemId, itemName: trimmedName, count: editCount },
     });
-    setIsEditing(false); // Exit edit mode
+    setIsEditing(false);
+    setIsMenuOpen(false);
   };
 
   const handleCancel = () => {
     setEditName(itemName);
     setEditCount(count);
     setIsEditing(false);
+    setIsMenuOpen(false);
   };
 
   const handleRemove = () => {
-    if (!window.confirm(`Opravdu smazat "${itemName}"?`)) {
-      console.log("[ItemRow] REMOVE CANCELLED by user");
-      return;
+    if (window.confirm(`Opravdu smazat "${itemName}"?`)) {
+      console.log("Removing item with ID:", itemId);
+      dispatch({ type: "REMOVE_ITEM", payload: { itemId } });
     }
-
-    dispatch({ type: "REMOVE_ITEM", payload: { itemId } });
+    setIsMenuOpen(false);
   };
 
-  // -------------------------------------------------
-  // 4. RENDER UI
-  // -------------------------------------------------
   return (
     <li
-      style={{
-        display: "flex",
-        alignItems: "center",
-        padding: "10px 0",
-        borderBottom: "1px dotted #dee2e6",
-        opacity: isResolved ? 0.6 : 1,
-        backgroundColor: isResolved ? "#f8f9fa" : "transparent",
-      }}
+      className={`
+        flex justify-between items-center py-2.5 border-b border-dotted border-gray-300
+        ${isResolved ? "opacity-60 bg-gray-50" : ""}
+      `}
     >
-      {/* 4.1 – RESOLVED CHECKBOX */}
-      <input
-        type="checkbox"
-        checked={isResolved}
-        onChange={handleToggle}
-        disabled={!isManager}
-        style={{
-          marginRight: "12px",
-          cursor: isManager ? "pointer" : "not-allowed",
-        }}
-        title={
-          isManager ? "Označit jako vyřešené" : "Pouze správci mohou měnit"
-        }
-      />
-
-      {/* 4.2 – NAME & COUNT (EDIT MODE OR VIEW MODE) */}
+      {/* ---------- Left: Text or Edit Mode ---------- */}
       {isEditing ? (
-        <div style={{ display: "flex", gap: "8px", flex: 1 }}>
+        <div className="flex gap-2 flex-1">
           <input
+            type="text"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "6px",
-              borderRadius: "4px",
-              border: "1px solid #ced4da",
-            }}
             autoFocus
-            placeholder="Název položky"
+            className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="number"
             value={editCount}
             onChange={(e) => setEditCount(Math.max(1, Number(e.target.value)))}
             min="1"
-            style={{
-              width: "70px",
-              padding: "6px",
-              borderRadius: "4px",
-              border: "1px solid #ced4da",
-            }}
+            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       ) : (
-        <span style={{ flex: 1, fontWeight: isResolved ? "normal" : "500" }}>
+        <span
+          className={`
+            flex-1 font-medium text-gray-900
+            ${isResolved ? "font-normal text-gray-700" : ""}
+          `}
+        >
           <strong>{itemName}</strong> × {count}
-          {isResolved && (
-            <em style={{ color: "#6c757d", marginLeft: "8px" }}> (vyřešeno)</em>
-          )}
+          {isResolved && <em className="ml-2 text-gray-600">(Solved)</em>}
         </span>
       )}
 
-      {/* 4.3 – ACTION BUTTONS (only for managers) */}
-      {isManager && (
-        <div style={{ display: "flex", gap: "6px" }}>
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleSave}
-                style={btnStyle("green")}
-                title="Uložit změny"
-              >
-                Save
-              </button>
-              <button
-                onClick={handleCancel}
-                style={btnStyle("gray")}
-                title="Zrušit úpravy"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => {
-                  setIsEditing(true);
-                }}
-                style={btnStyle("blue")}
-                title="Upravit položku"
-              >
-                Edit
-              </button>
-              <button
-                onClick={handleRemove}
-                style={btnStyle("red")}
-                title="Smazat položku"
-              >
-                Remove
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      {/* ---------- Right: Checkbox + Menu ---------- */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={isResolved}
+          onChange={handleToggle}
+          disabled={!isManager}
+          className={`
+            w-5 h-5 rounded cursor-pointer
+            ${!isManager ? "cursor-not-allowed opacity-50" : ""}
+          `}
+        />
+
+        {isManager && (
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setIsMenuOpen((p) => !p)}
+              className="p-1 text-lg text-gray-700 hover:bg-gray-200 rounded"
+            >
+              ⋮
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 top-6 bg-white border border-gray-300 rounded-lg shadow-md min-w-[120px] z-50">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                    >
+                      Edit Edit
+                    </button>
+                    <button
+                      onClick={handleRemove}
+                      className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Delete Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </li>
   );
 }
 
-// -------------------------------------------------
-// 5. HELPER: Button styles
-// -------------------------------------------------
-const btnStyle = (color) => ({
-  backgroundColor: {
-    green: "#28a745",
-    gray: "#6c757d",
-    blue: "#007bff",
-    red: "#dc3545",
-  }[color],
-  color: "white",
-  border: "none",
-  padding: "6px 10px",
-  borderRadius: "4px",
-  cursor: "pointer",
-  fontSize: "13px",
-  fontWeight: "600",
-  transition: "opacity 0.2s",
-  ":hover": { opacity: 0.9 },
-});
-
-// -------------------------------------------------
-// 6. PROPTYPES – runtime validation
-// -------------------------------------------------
 ItemRow.propTypes = {
   item: PropTypes.shape({
     itemId: PropTypes.string.isRequired,
@@ -215,5 +165,4 @@ ItemRow.propTypes = {
     isResolved: PropTypes.bool.isRequired,
   }).isRequired,
   isManager: PropTypes.bool.isRequired,
-  dispatch: PropTypes.func.isRequired,
 };

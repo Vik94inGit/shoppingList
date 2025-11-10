@@ -83,6 +83,11 @@ export const ShoppingListReducer = (state, action) => {
       };
       return save({ ...state, items: [...state.items, newItem] });
 
+    case "RESET_LIST": {
+      // Replace the whole list with the original data
+      return { ...SHOPPING_LIST_DATA };
+    }
+
     case "TOGGLE_ITEM_RESOLVED":
       if (!isManager) return state;
       return save({

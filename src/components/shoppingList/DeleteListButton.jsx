@@ -2,7 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export default function DeleteListButton({ userId, ownerId, dispatch }) {
+export function DeleteListButton({ userId, ownerId, dispatch }) {
   // UI authorisation: Show button only to the owner
   const isOwner = ownerId === userId;
   if (!isOwner) return null;
@@ -18,27 +18,13 @@ export default function DeleteListButton({ userId, ownerId, dispatch }) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "20px",
-        padding: "10px",
-        borderTop: "1px solid #eee",
-      }}
-    >
+    <div>
       <button
         type="button"
         onClick={handleDelete}
         aria-label="Smazat celý nákupní seznam"
-        style={{
-          backgroundColor: "#dc3545",
-          color: "white",
-          border: "none",
-          padding: "8px 15px",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
       >
-        Smazat celý seznam (Pouze pro Vlastníka)
+        Delete all list
       </button>
     </div>
   );

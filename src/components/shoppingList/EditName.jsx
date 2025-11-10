@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useShoppingList } from "../../context/shoppingListContext";
 
-export default function EditName({ name, ownerId }) {
+export function EditName({ name, ownerId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(name);
 
@@ -50,33 +50,11 @@ export default function EditName({ name, ownerId }) {
     setNewName(name);
   };
 
-  if (!isOwner) {
-    return <h3 style={{ margin: "0 0 10px 0", color: "#495057" }}>{name}</h3>;
-  }
-
   // OWNER VIEW
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        marginBottom: "12px",
-        flexWrap: "wrap",
-      }}
-    >
-      <h2>🛒 Nákupní Seznam: </h2>
-
+    <div>
       {isEditing ? (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            gap: "8px",
-            alignItems: "center",
-            minWidth: "200px",
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             value={newName}
@@ -100,10 +78,7 @@ export default function EditName({ name, ownerId }) {
         </form>
       ) : (
         <>
-          <h2>{name}</h2>
-          <button onClick={handleEditClick} style={btnStyle("blue")}>
-            Rename
-          </button>
+          <button onClick={handleEditClick}>Rename</button>
         </>
       )}
     </div>
@@ -115,7 +90,7 @@ const btnStyle = (color) => ({
   backgroundColor: { green: "#28a745", gray: "#6c757d", blue: "#007bff" }[
     color
   ],
-  color: "white",
+  color: "black",
   border: "none",
   padding: "8px 16px",
   borderRadius: "4px",

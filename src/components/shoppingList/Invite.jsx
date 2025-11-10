@@ -137,7 +137,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
           style={{
             backgroundColor:
               email.trim() && userName.trim() ? "#007bff" : "#bbdefb",
-            color: "white",
+            color: "black",
             border: "none",
             padding: "8px 16px",
             borderRadius: "4px",

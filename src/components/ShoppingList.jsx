@@ -1,131 +1,183 @@
-// Import dceřiných UI komponent
-import { use, useState } from "react";
-import EditName from "./shoppingList/EditName";
-import MemberList from "./shoppingList/MemberList";
-import ItemsList from "./shoppingList/ItemsList";
-import DeleteListButton from "./shoppingList/DeleteListButton";
-import CreateItemForm from "./shoppingList/CreateItemForm";
+import { useState } from "react";
 import { useShoppingList } from "../context/shoppingListContext";
+import { EditName } from "./shoppingList/EditName";
+import { DeleteListButton } from "./shoppingList/DeleteListButton";
+
+import { MemberList } from "./shoppingList/MemberList";
+import ItemsList from "./shoppingList/ItemsList"; // 👈 import ItemsList
+
+const FilterOptions = ["All", "Unsolved", "Solved"];
 
 export function ShoppingList() {
-  const [showResolvedItems, setShowResolvedItems] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Získání stavu a dispečera (logiky) z Contextu
-  // Dispečer se předává DOLŮ
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [newName, setNewName] = useState("");
+  const [newCount, setNewCount] = useState("");
+  const [isMembersListVisible, setIsMembersListVisible] = useState(false);
   const { listData, dispatch, userId } = useShoppingList();
+  const { name, items, shopListId, members, ownerId } = listData;
 
-  // --- DATA a AUTORIZACE ---
-  const { shopListId, ownerId, name, members, items } = listData;
-
+  // determine if current user can manage items
   const isOwner = ownerId === userId;
   const isMember = members.some((m) => m.userId === userId);
   const isManager = isOwner || isMember;
 
-  // Tato komponenta NEMÁ ŽÁDNÉ FUNKCE handle* nebo dispatch*
-  // Všechny akce, včetně logiky pro přepínání filtru (UI logika), jsou přesunuty do dceřiných komponent.
+  const handleAddItem = () => {
+    // 1. Validation check
+    if (!newName) return;
+
+    // 2. Dispatch action to reducer
+    dispatch({
+      type: "ADD_ITEM",
+      payload: {
+        shopListId,
+        // ❗ IMPORTANT FIX: Pass the state values, NOT the setter functions!
+        itemName: newName,
+        count: newCount,
+        userId,
+      },
+    });
+
+    // 3. Reset local state
+    setNewName("");
+    setNewCount("");
+  };
+
+  const resetListToDefault = () => {
+    // Optional: ask the user to confirm – prevents accidental wipes
+    const confirmed = window.confirm(
+      "Opravdu chcete resetovat seznam na výchozí stav? Všechny změny budou ztraceny."
+    );
+
+    if (!confirmed) return;
+
+    dispatch({ type: "RESET_LIST" });
+  };
+
+  const filteredItems = items.filter((item) => {
+    if (activeFilter === "Solved") return item.isResolved;
+    if (activeFilter === "Unsolved") return !item.isResolved;
+    return true; // "All"
+  });
+
+  const toggleMembers = () => {
+    setIsMembersListVisible((p) => !p); // Toggle visibility
+  };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          position: "relative",
-        }}
+    <div className="max-w-2xl mx-auto p-4 bg-white relative">
+      {/* ---------- Header ---------- */}
+      <h1 className="text-2xl font-semibold text-gray-900 mb-4">{name}</h1>
+
+      {/* ---------- Popover trigger ---------- */}
+      <button
+        onClick={() => setIsPopoverOpen((p) => !p)}
+        className="absolute right-4 top-6 text-xl font-bold hover:text-gray-600"
       >
-        <EditName name={name} ownerId={ownerId} />
-        <div
-          style={{
-            position: "relative",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: "50%",
-              color: "black",
-              width: 24,
-              height: 24,
-              display: "flex",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-            onClick={() => setIsPopoverOpen((prev) => !prev)}
+        •••
+      </button>
+
+      {/* ---------- Popover ---------- */}
+      {isPopoverOpen && (
+        <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[180px] p-2 z-50">
+          {/* Filters */}
+          {FilterOptions.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => {
+                setActiveFilter(filter);
+                setIsPopoverOpen(false);
+              }}
+              className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100 ${
+                activeFilter === filter ? "font-bold bg-gray-100" : ""
+              }`}
+            >
+              Show {filter}
+            </button>
+          ))}
+
+          {/* Action buttons */}
+          <button
+            onClick={toggleMembers}
+            className="block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100"
           >
-            •••
-          </div>
-          {isPopoverOpen && (
-            <div style={{ position: "absolute", background: "white" }}>
-              <MemberList
-                members={members}
+            Manage Members
+          </button>
+
+          {isOwner && (
+            <>
+              <EditName
+                name={name}
                 ownerId={ownerId}
                 userId={userId}
-                dispatch={dispatch} // Předává dispatch
+                dispatch={dispatch}
+                shopListId={shopListId}
+              >
+                Rename List
+              </EditName>
+
+              <button
+                onClick={resetListToDefault}
+                className="block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100"
+              >
+                Reset List
+              </button>
+
+              <DeleteListButton
+                userId={userId}
+                ownerId={ownerId}
+                dispatch={dispatch}
+                shopListId={shopListId}
               />
-            </div>
+            </>
           )}
         </div>
-      </div>
+      )}
 
-      <p>
-        Aktuální uživatel ID: **{userId}** (
-        {isOwner ? "**VLASTNÍK**" : isMember ? "**ČLEN**" : "**HOST**"})
-      </p>
-
-      {/* Sekce pro správu (Edit, MemberList, Delete) */}
-      <section
-        style={{
-          border: "1px solid #ccc",
-          padding: "15px",
-          marginBottom: "20px",
-        }}
-      >
-        <h2>📝 Správa Seznamu</h2>
-
-        {/* MemberList Komponenta - Bude volat DISPATCH uvnitř sebe */}
-
-        {/* Delete Komponenta - Bude volat DISPATCH uvnitř sebe */}
-        <DeleteListButton
-          shopListId={shopListId}
-          userId={userId}
-          ownerId={ownerId}
-          dispatch={dispatch} // Předává dispatch
-        />
-        <button
-          onClick={() => {
-            localStorage.removeItem("shoppingList");
-            window.location.reload();
-          }}
-          style={{ color: "red" }}
-        >
-          Reset to Initial Data
-        </button>
-      </section>
-
-      {/* Sekce pro položky */}
-      <section style={{ border: "1px solid #ccc", padding: "15px" }}>
-        <h2>🧺 Položky (Celkem: {items.length})</h2>
-
-        {/* Create Komponenta - Bude volat DISPATCH uvnitř sebe */}
-        {isManager && (
-          <CreateItemForm
+      {/* ---------- Members list (absolute) ---------- */}
+      {isMembersListVisible && (
+        <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-40">
+          <MemberList
+            members={members}
+            ownerId={ownerId}
             userId={userId}
-            dispatch={dispatch} // Předává dispatch
+            dispatch={dispatch}
           />
-        )}
+        </div>
+      )}
 
-        {/* Item Komponenta (ItemsList) - Bude volat DISPATCH uvnitř sebe */}
-        <ItemsList
-          items={items}
-          shopListId={shopListId}
-          isManager={isManager}
-          showResolvedItems={showResolvedItems}
-          onToggleResolvedItems={() => setShowResolvedItems((prev) => !prev)} // UI logika zůstává
-          dispatch={dispatch} // Předává dispatch
-        />
-      </section>
+      {/* ---------- Items ---------- */}
+      <ItemsList
+        items={filteredItems}
+        isManager={isManager}
+        dispatch={dispatch}
+      />
+
+      {/* ---------- Add new item ---------- */}
+      {isManager && (
+        <div className="flex gap-2 mt-6">
+          <input
+            type="text"
+            placeholder="Item name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="number"
+            placeholder="Count"
+            value={newCount}
+            onChange={(e) => setNewCount(e.target.value)}
+            className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleAddItem}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            Add
+          </button>
+        </div>
+      )}
     </div>
   );
 }

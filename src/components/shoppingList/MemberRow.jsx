@@ -86,7 +86,7 @@ export default function MemberRow({
         alignItems: "center",
         padding: "10px 8px",
         borderBottom: "1px dotted #dee2e6",
-        backgroundColor: isCurrentUser ? "#f8f9fa" : "transparent",
+        backgroundColor: "#f8f9fa",
         borderRadius: "6px",
         margin: "2px 0",
       }}
@@ -106,7 +106,7 @@ export default function MemberRow({
           }}
           aria-label={role.text}
         >
-          {role.icon} {role.text}
+          {role.text}
         </span>
       </div>
 

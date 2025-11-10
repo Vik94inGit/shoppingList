@@ -9,7 +9,7 @@ export default function App() {
           path="/"
           element={
             <div style={{ padding: "30px", fontFamily: "Inter, sans-serif" }}>
-              <h1 style={{ color: "#007bff" }}>Vítejte v Nákupním Seznamu</h1>
+              <h1 style={{ color: "#101316ff" }}>Vítejte v Nákupním Seznamu</h1>
               <p>
                 Aplikace očekává dynamické ID seznamu. Pro spuštění přejděte na
                 URL s ID seznamu, např.:
@@ -17,7 +17,7 @@ export default function App() {
               <p>
                 <a
                   href="/list/sl-1"
-                  style={{ color: "#28a745", fontWeight: "bold" }}
+                  style={{ color: "#15331cff", fontWeight: "bold" }}
                 >
                   /list/sl-1
                 </a>
@@ -27,7 +27,8 @@ export default function App() {
         />
         <Route path="/list/sl-1" element={<ShoppingListApp />} />
         {/* /list/sl-1 by spustil naši komponentu */}
-      </Routes>~
+      </Routes>
+      ~
     </Router>
   );
 }

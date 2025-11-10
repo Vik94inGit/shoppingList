@@ -18,7 +18,7 @@ import Invite from "./Invite.jsx";
  *
  * LOGS: `[MemberList]` prefix
  */
-export default function MemberList({ members, ownerId, userId, dispatch }) {
+export function MemberList({ members, ownerId, userId, dispatch }) {
   // AUTH + SAFETY
   const isOwner = ownerId === userId;
   const memberArray = Array.isArray(members) ? members : [];
@@ -43,7 +43,7 @@ export default function MemberList({ members, ownerId, userId, dispatch }) {
           fontWeight: "600",
         }}
       >
-        👥 Členové seznamu ({memberArray.length})
+        👥 Members ({memberArray.length})
       </h3>
 
       {/* MEMBERS LIST */}
@@ -74,7 +74,7 @@ export default function MemberList({ members, ownerId, userId, dispatch }) {
             style={{
               padding: "20px",
               textAlign: "center",
-              color: "#6c757d",
+              color: "#252628ff",
               fontStyle: "italic",
               backgroundColor: "#f1f3f5",
               borderRadius: "6px",
@@ -99,7 +99,7 @@ export default function MemberList({ members, ownerId, userId, dispatch }) {
           style={{
             display: "block",
             marginTop: "16px",
-            color: "#856404",
+            color: "#31280cff",
             fontSize: "12px",
             textAlign: "center",
             fontStyle: "italic",
