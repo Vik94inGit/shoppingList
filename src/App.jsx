@@ -28,7 +28,6 @@ export default function App() {
         <Route path="/list/sl-1" element={<ShoppingListApp />} />
         {/* /list/sl-1 by spustil naši komponentu */}
       </Routes>
-      ~
     </Router>
   );
 }

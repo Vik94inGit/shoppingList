@@ -8,7 +8,6 @@ import ItemRow from "./ItemRow";
 // Přijímá: items (již filtrované pole položek), isManager (boolean), dispatch (funkce pro akce).
 export default function ItemsList({
   items, // <--- PŘEDFILTROVANÉ POLOŽKY
-  isManager,
   dispatch,
 }) {
   // ❗ Odstraněny zakomentované a nepoužívané proměnné (filter, resolvedCount, activeCount)
@@ -27,12 +26,7 @@ export default function ItemsList({
         {items.length > 0 ? (
           // Mapování a vykreslení filtrovaných položek.
           items.map((item) => (
-            <ItemRow
-              key={item.itemId}
-              item={item}
-              isManager={isManager}
-              dispatch={dispatch}
-            />
+            <ItemRow key={item.itemId} item={item} dispatch={dispatch} />
           ))
         ) : (
           // Zpráva, pokud po filtrování nejsou žádné položky k zobrazení.

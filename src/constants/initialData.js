@@ -1,4 +1,4 @@
-// src/constants/initialData.js
+export const CURRENT_USER_ID = "user-owner-123"; // Simulace aktuálně přihlášeného uživatele
 
 export let SHOPPING_LIST_DATA = {
   shopListId: "sl-1",
@@ -21,6 +21,5 @@ export let SHOPPING_LIST_DATA = {
     { itemId: "item-2", itemName: "Chléb", count: 2, isResolved: true },
     { itemId: "item-3", itemName: "Máslo", count: 1, isResolved: false },
   ],
+  userId: CURRENT_USER_ID,
 };
-
-export const CURRENT_USER_ID = "user-member-456"; // Simulace aktuálně přihlášeného uživatele

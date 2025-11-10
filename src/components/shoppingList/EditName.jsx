@@ -1,9 +1,9 @@
 // src/components/shoppingList/EditName.jsx
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useShoppingList } from "../../context/shoppingListContext";
+import { useShoppingList } from "../../context/ShoppingListContext";
 
-export function EditName({ name, ownerId }) {
+export function EditName({ name, ownerId, children }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(name);
 
@@ -62,12 +62,6 @@ export function EditName({ name, ownerId }) {
             placeholder="Nový název"
             required
             autoFocus
-            style={{
-              padding: "8px 12px",
-              border: "1px solid #ced4da",
-              borderRadius: "4px",
-              fontSize: "16px",
-            }}
           />
           <button type="submit" style={btnStyle("green")}>
             Uložit
@@ -77,9 +71,11 @@ export function EditName({ name, ownerId }) {
           </button>
         </form>
       ) : (
-        <>
+        <div className="flex gap-4">
+          {children}
+          {/* TODO: replace with pen icon */}
           <button onClick={handleEditClick}>Rename</button>
-        </>
+        </div>
       )}
     </div>
   );

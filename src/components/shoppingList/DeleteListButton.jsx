@@ -18,15 +18,13 @@ export function DeleteListButton({ userId, ownerId, dispatch }) {
   };
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={handleDelete}
-        aria-label="Smazat celý nákupní seznam"
-      >
-        Delete all list
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={handleDelete}
+      aria-label="Smazat celý nákupní seznam"
+    >
+      Delete list
+    </button>
   );
 }
 

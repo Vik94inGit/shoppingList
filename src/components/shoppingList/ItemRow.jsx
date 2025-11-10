@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useShoppingList } from "../../context/ShoppingListContext";
 
-export default function ItemRow({ item, isManager }) {
+export default function ItemRow({ item }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.itemName);
   const [editCount, setEditCount] = useState(item.count);
@@ -58,9 +58,10 @@ export default function ItemRow({ item, isManager }) {
 
   return (
     <li
+      ref={menuRef}
       className={`
-        flex justify-between items-center py-2.5 border-b border-dotted border-gray-300
-        ${isResolved ? "opacity-60 bg-gray-50" : ""}
+        flex justify-between items-center py-2 border-b gap-2
+        ${isResolved ? "bg-gray-50" : ""}
       `}
     >
       {/* ---------- Left: Text or Edit Mode ---------- */}
@@ -85,7 +86,7 @@ export default function ItemRow({ item, isManager }) {
         <span
           className={`
             flex-1 font-medium text-gray-900
-            ${isResolved ? "font-normal text-gray-700" : ""}
+            ${isResolved ? "font-normal text-gray-700 line-through" : ""}
           `}
         >
           <strong>{itemName}</strong> × {count}
@@ -94,61 +95,55 @@ export default function ItemRow({ item, isManager }) {
       )}
 
       {/* ---------- Right: Checkbox + Menu ---------- */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 relative">
         <input
           type="checkbox"
           checked={isResolved}
           onChange={handleToggle}
-          disabled={!isManager}
           className={`
             w-5 h-5 rounded cursor-pointer
-            ${!isManager ? "cursor-not-allowed opacity-50" : ""}
           `}
         />
 
-        {isManager && (
-          <div ref={menuRef} className="relative">
-            <button
-              onClick={() => setIsMenuOpen((p) => !p)}
-              className="p-1 text-lg text-gray-700 hover:bg-gray-200 rounded"
-            >
-              ⋮
-            </button>
+        <button
+          onClick={() => setIsMenuOpen((p) => !p)}
+          className="p-1 text-lg text-gray-700 hover:bg-gray-200 rounded"
+        >
+          ⋮
+        </button>
 
-            {isMenuOpen && (
-              <div className="absolute right-0 top-6 bg-white border border-gray-300 rounded-lg shadow-md min-w-[120px] z-50">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Edit Edit
-                    </button>
-                    <button
-                      onClick={handleRemove}
-                      className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Delete Delete
-                    </button>
-                  </>
-                )}
-              </div>
+        {isMenuOpen && (
+          <div className="absolute right-0 top-6 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleRemove}
+                  className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </>
             )}
           </div>
         )}
@@ -164,5 +159,4 @@ ItemRow.propTypes = {
     count: PropTypes.number.isRequired,
     isResolved: PropTypes.bool.isRequired,
   }).isRequired,
-  isManager: PropTypes.bool.isRequired,
 };
