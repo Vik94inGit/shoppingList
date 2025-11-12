@@ -6,20 +6,27 @@ import {
 import { ShoppingListReducer } from "./ShoppingListReducer.jsx";
 
 const ShoppingListContext = createContext();
-
-const loadInitialState = () => {
+export const loadInitialState = () => {
+  let listData = { ...SHOPPING_LIST_DATA };
   try {
     const saved = localStorage.getItem("shoppingList");
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Only merge if it looks like a valid list
+      if (parsed && typeof parsed === "object" && parsed.shopListId) {
+        listData = parsed;
+      }
+    }
   } catch (err) {
     console.warn("[Context] Corrupted localStorage → resetting", err);
     localStorage.removeItem("shoppingList");
   }
-  return SHOPPING_LIST_DATA;
+
+  return listData;
 };
 
 export function ShoppingListProvider({ children }) {
-  const [listData, rawDispatch] = useReducer(
+  const [listData, dispatch] = useReducer(
     ShoppingListReducer,
     loadInitialState()
   );
@@ -33,10 +40,14 @@ export function ShoppingListProvider({ children }) {
     }
   }, [listData]);
 
-  const dispatch = (action) => rawDispatch(action);
+  const value = {
+    listData, // ← { name, items, members, ... }
+    userId: CURRENT_USER_ID, // ← for auth, never in localStorage
+    dispatch,
+  };
 
   return (
-    <ShoppingListContext.Provider value={{ listData, dispatch }}>
+    <ShoppingListContext.Provider value={value}>
       {children}
     </ShoppingListContext.Provider>
   );

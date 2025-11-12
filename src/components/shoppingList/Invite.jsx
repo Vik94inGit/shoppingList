@@ -41,7 +41,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
   // HANDLE SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    console.log("[Invite] handleSubmit CALLED!");
     // TRIM & VALIDATE
     const trimmedEmail = email.trim();
     const trimmedName = userName.trim();
@@ -55,6 +55,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
     const payload = {
       email: trimmedEmail,
       userName: trimmedName,
+      userId: userId,
     };
 
     // DISPATCH → Reducer handles invitation
@@ -137,6 +138,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
           style={{
             backgroundColor:
               email.trim() && userName.trim() ? "#007bff" : "#bbdefb",
+
             color: "black",
             border: "none",
             padding: "8px 16px",
@@ -148,24 +150,11 @@ export default function Invite({ userId, dispatch, isOwner }) {
           }}
           aria-label="Poslat pozvánku"
         >
-          Poslat pozvánku
+          Send invitation
         </button>
       </form>
 
       {/* DEBUG NOTE */}
-      {process.env.NODE_ENV === "development" && (
-        <small
-          style={{
-            display: "block",
-            marginTop: "10px",
-            color: "#0d47a1",
-            fontSize: "12px",
-            fontStyle: "italic",
-          }}
-        >
-          Otevři DevTools Console → filtruj `[Invite]` pro dataflow!
-        </small>
-      )}
     </div>
   );
 }

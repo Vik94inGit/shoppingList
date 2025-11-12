@@ -21,7 +21,7 @@ export const ShoppingListReducer = (state, action) => {
   switch (action.type) {
     // --- LOGIKA SEZNAMU (Vlastník) ---
     case "RENAME_LIST":
-      if (!isOwner) return state;
+      console.log("[Reducer] Renaming to:", action.payload.newName);
       return save({ ...state, name: action.payload.newName });
 
     case "UPDATE_ITEM":
@@ -35,7 +35,7 @@ export const ShoppingListReducer = (state, action) => {
       });
 
     case "DELETE_LIST":
-      if (!isOwner) return state;
+      console.log("[Reducer] DELETE_LIST received"); // ← ADD THIS
       localStorage.removeItem("shoppingList");
       const empty = {
         shopListId: null,
@@ -57,19 +57,24 @@ export const ShoppingListReducer = (state, action) => {
       return save({ ...state, members: [...members, newMember] });
 
     case "REMOVE_MEMBER": {
-      const memberIdToRemove = action.payload.memberId;
-      const canRemove = isOwner || memberIdToRemove === userId;
+      const { memberId: memberIdToRemove, currentUserId } = action.payload;
 
-      if (!canRemove || memberIdToRemove === ownerId) {
-        console.warn(
-          "Autorizace selhala: Nelze odstranit Vlastníka nebo nemáte oprávnění."
-        );
+      console.log("REMOVE_MEMBER →", {
+        memberIdToRemove,
+        ownerId: state.ownerId,
+        currentUserId,
+      });
+
+      // 1. Cannot remove owner
+      if (memberIdToRemove === state.ownerId) {
+        console.warn("BLOCKED: Cannot remove owner");
         return state;
       }
-      return save({
+
+      return {
         ...state,
-        members: members.filter((m) => m.userId !== memberIdToRemove),
-      });
+        members: state.members.filter((m) => m.userId !== memberIdToRemove),
+      };
     }
 
     // --- LOGIKA POLOŽEK (Owner / Member) ---
@@ -84,8 +89,8 @@ export const ShoppingListReducer = (state, action) => {
       return save({ ...state, items: [...state.items, newItem] });
 
     case "RESET_LIST":
-      // Replace the whole list with the original data
-      return { ...state, listData: { ...state.listData, items: [] } };
+      console.log("[Reducer] RESET_LIST received");
+      return save(SHOPPING_LIST_DATA);
 
     case "TOGGLE_ITEM_RESOLVED":
       if (!isManager) return state;

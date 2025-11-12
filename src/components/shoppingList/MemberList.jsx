@@ -80,7 +80,7 @@ export function MemberList({ members, ownerId, userId, dispatch }) {
               borderRadius: "6px",
             }}
           >
-            <p>Seznam členů je prázdný</p>
+            <p>Nobody is here</p>
             <small>(pouze vlastník je automaticky členem)</small>
           </div>
         )}
@@ -104,9 +104,7 @@ export function MemberList({ members, ownerId, userId, dispatch }) {
             textAlign: "center",
             fontStyle: "italic",
           }}
-        >
-          DevTools → filter `[MemberList]` for data flow
-        </small>
+        ></small>
       )}
     </div>
   );

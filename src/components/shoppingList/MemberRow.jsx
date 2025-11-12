@@ -22,6 +22,7 @@ export default function MemberRow({
   dispatch,
 }) {
   //
+  console.log("[MemberRow] member prop:", member, ownerId, currentUserId);
   // 1. DEFENSIVE CHECK
   // -------------------------------------------------
   if (!member || !member.userId) {
@@ -42,13 +43,32 @@ export default function MemberRow({
   // 3. ACTION HANDLERS
   // -------------------------------------------------
   const handleRemoveOther = () => {
+    if (isOwner) {
+      alert("Nelze odstranit vlastníka seznamu.");
+      return;
+    }
+
+    if (isCurrentUser) {
+      const leave = window.confirm(
+        `Opravdu chcete opustit seznam? Budete odstraněni jako člen.`
+      );
+      if (!leave) return;
+
+      // Optional: special action for leaving
+      dispatch({ type: "LEAVE_LIST", payload: { memberId } });
+      return;
+    }
+    if (!isListOwner) {
+      alert("Nemáte oprávnění odstraňovat členy.");
+      return;
+    }
     const confirmed = window.confirm(
-      `Opravdu chcete odebrat člena **${userName}** (${email})?`
+      `You really want to remove **${userName}** (${email})?`
     );
     if (confirmed) {
       dispatch({
         type: "REMOVE_MEMBER",
-        payload: { memberId },
+        payload: { memberId, currentUserId },
       });
     }
   };
@@ -94,7 +114,7 @@ export default function MemberRow({
       {/* USER INFO */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <strong style={{ color: "#212529" }}>{userName}</strong>
-        <span style={{ color: "#6c757d", fontSize: "14px" }}>({email})</span>
+
         <span
           style={{
             backgroundColor: role.color,

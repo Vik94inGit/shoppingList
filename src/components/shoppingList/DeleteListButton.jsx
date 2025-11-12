@@ -13,6 +13,7 @@ export function DeleteListButton({ userId, ownerId, dispatch }) {
     );
 
     if (confirmed) {
+      console.log("[Component] Dispatching DELETE_LIST");
       dispatch({ type: "DELETE_LIST" });
     }
   };
@@ -23,7 +24,7 @@ export function DeleteListButton({ userId, ownerId, dispatch }) {
       onClick={handleDelete}
       aria-label="Smazat celý nákupní seznam"
     >
-      Delete list
+      🗑️
     </button>
   );
 }

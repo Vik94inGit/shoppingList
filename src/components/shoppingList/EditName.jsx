@@ -9,8 +9,6 @@ export function EditName({ name, ownerId, children }) {
 
   const { dispatch, userId } = useShoppingList();
 
-  const isOwner = ownerId === userId;
-
   const handleEditClick = () => {
     setIsEditing(true);
     setNewName(name);
@@ -30,11 +28,6 @@ export function EditName({ name, ownerId, children }) {
       console.log(`[EditName] Validation FAILED: empty name`);
       return;
     }
-
-    // if (!isOwner) {
-    //   console.log(`[EditName] BLOCKED: not owner`);
-    //   return;
-    // }
 
     dispatch({
       type: "RENAME_LIST",
@@ -63,36 +56,21 @@ export function EditName({ name, ownerId, children }) {
             required
             autoFocus
           />
-          <button type="submit" style={btnStyle("green")}>
-            Uložit
-          </button>
-          <button type="button" onClick={handleCancel} style={btnStyle("gray")}>
-            Zrušit
+          <button type="submit">💾</button>
+          <button type="button" onClick={handleCancel}>
+            ❌
           </button>
         </form>
       ) : (
         <div className="flex gap-4">
           {children}
           {/* TODO: replace with pen icon */}
-          <button onClick={handleEditClick}>Rename</button>
+          <button onClick={handleEditClick}>✏️</button>
         </div>
       )}
     </div>
   );
 }
-
-// Button styles
-const btnStyle = (color) => ({
-  backgroundColor: { green: "#28a745", gray: "#6c757d", blue: "#007bff" }[
-    color
-  ],
-  color: "black",
-  border: "none",
-  padding: "8px 16px",
-  borderRadius: "4px",
-  cursor: "pointer",
-  fontWeight: "bold",
-});
 
 EditName.propTypes = {
   name: PropTypes.string.isRequired,

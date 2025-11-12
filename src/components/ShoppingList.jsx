@@ -15,18 +15,21 @@ export function ShoppingList() {
   const [newCount, setNewCount] = useState("");
   const [isMembersListVisible, setIsMembersListVisible] = useState(false);
   const { listData, dispatch } = useShoppingList();
-  const { name, items, shopListId, members, ownerId } = listData;
+
+  const { name, ownerId, members, items, shopListId } = listData;
 
   const userId = listData.userId;
-
+  console.log("listData in ShoppingList", listData);
+  console.log(members, "members in ShoppingList");
   // determine if current user can manage items
   const isOwner = ownerId === userId;
   const isMember = members.some((m) => m.userId === userId);
   const isManager = isOwner || isMember;
-
+  console.log("[ShoppingList] listData:", listData);
   const handleAddItem = () => {
     // 1. Validation check
     if (!newName) return;
+    console.log("listData in ShoppingList:", listData);
 
     // 2. Dispatch action to reducer
     dispatch({
@@ -52,7 +55,7 @@ export function ShoppingList() {
     );
 
     if (!confirmed) return;
-
+    console.log("[Component] Dispatching RESET_LIST");
     dispatch({ type: "RESET_LIST" });
   };
 
@@ -66,38 +69,30 @@ export function ShoppingList() {
     setIsMembersListVisible((p) => !p); // Toggle visibility
   };
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      "Opravdu chcete smazat nákupní seznam? Tato akce je nevratná."
-    );
-
-    if (confirmed) {
-      dispatch({ type: "DELETE_LIST" });
-    }
-  };
-
   return (
     <div className="p-4">
       <header className="flex justify-between items-center mb-4 relative">
         {/* ---------- Header ---------- */}
-        <div className="flex gap-4">
-          <EditName
-            name={name}
-            ownerId={ownerId}
-            userId={userId}
-            dispatch={dispatch}
-            shopListId={shopListId}
-          >
-            <h1 className="text-2xl font-bold text-gray-900 "> {name}</h1>
-          </EditName>
-          <button
-            type="button"
-            onClick={handleDelete}
-            aria-label="Smazat celý nákupní seznam"
-          >
-            Delete list
-          </button>
-        </div>
+        {isOwner ? (
+          <div className="flex gap-4">
+            <EditName
+              name={name}
+              ownerId={ownerId}
+              dispatch={dispatch}
+              shopListId={shopListId}
+            >
+              <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
+            </EditName>
+            <DeleteListButton
+              userId={userId}
+              ownerId={ownerId}
+              dispatch={dispatch}
+            />
+          </div>
+        ) : (
+          // Non-owner view: just the name
+          <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
+        )}
         <button
           onClick={() => setIsPopoverOpen((p) => !p)}
           className="border rounded-full w-8 h-8"
