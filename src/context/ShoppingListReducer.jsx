@@ -77,6 +77,23 @@ export const ShoppingListReducer = (state, action) => {
       };
     }
 
+    case "LEAVE_LIST": {
+      const { userId: leavingUserId } = action.payload;
+
+      console.log("[Reducer] LEAVE_LIST →", { leavingUserId, ownerId });
+
+      // 1. Owner cannot leave
+      if (leavingUserId === state.ownerId) {
+        console.warn("BLOCKED: Owner cannot leave the list");
+        return state;
+      }
+
+      return save({
+        ...state,
+        members: state.members.filter((m) => m.userId !== leavingUserId),
+      });
+    }
+
     // --- LOGIKA POLOŽEK (Owner / Member) ---
     case "ADD_ITEM":
       if (!isManager) return state;
@@ -93,7 +110,6 @@ export const ShoppingListReducer = (state, action) => {
       return save(SHOPPING_LIST_DATA);
 
     case "TOGGLE_ITEM_RESOLVED":
-      if (!isManager) return state;
       return save({
         ...state,
         items: state.items.map((item) =>
@@ -104,12 +120,14 @@ export const ShoppingListReducer = (state, action) => {
       });
 
     case "REMOVE_ITEM":
-      if (!isManager) return state;
+      const { itemId } = action.payload;
+
+      console.log("REMOVE_ITEM → filtering out:", itemId);
+
       return save({
         ...state,
-        items: state.items.filter(
-          (item) => item.itemId !== action.payload.itemId
-        ),
+
+        items: state.items.filter((item) => item.itemId !== itemId),
       });
 
     default:

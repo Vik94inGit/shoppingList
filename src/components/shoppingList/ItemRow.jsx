@@ -6,6 +6,8 @@ export default function ItemRow({ item }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.itemName);
   const [editCount, setEditCount] = useState(item.count);
+  const { listData } = useShoppingList();
+  const currentUserId = listData.userId;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   // ← Wrap in useCallback to stabilize reference
@@ -14,6 +16,8 @@ export default function ItemRow({ item }) {
       setIsMenuOpen(false);
     }
   }, []); // ← No dependencies! setIsMenuOpen is stable
+
+  const isMember = listData.members.some((m) => m.userId === currentUserId);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -27,7 +31,10 @@ export default function ItemRow({ item }) {
   const { itemId, itemName, count, isResolved } = item;
 
   const handleToggle = () => {
-    dispatch({ type: "TOGGLE_ITEM_RESOLVED", payload: { itemId } });
+    dispatch({
+      type: "TOGGLE_ITEM_RESOLVED",
+      payload: { itemId },
+    });
   };
 
   const handleSave = () => {
@@ -56,100 +63,104 @@ export default function ItemRow({ item }) {
     setIsMenuOpen(false);
   };
 
-  return (
-    <li
-      ref={menuRef}
-      className={`
+  if (isMember) {
+    return (
+      <li
+        ref={menuRef}
+        className={`
         flex justify-between items-center py-2 border-b gap-2
         ${isResolved ? "bg-gray-50" : ""}
       `}
-    >
-      {/* ---------- Left: Text or Edit Mode ---------- */}
-      {isEditing ? (
-        <div className="flex gap-2 flex-1">
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            autoFocus
-            className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="number"
-            value={editCount}
-            onChange={(e) => setEditCount(Math.max(1, Number(e.target.value)))}
-            min="1"
-            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      ) : (
-        <span
-          className={`
+      >
+        {/* ---------- Left: Text or Edit Mode ---------- */}
+        {isEditing ? (
+          <div className="flex gap-2 flex-1">
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              autoFocus
+              className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="number"
+              value={editCount}
+              onChange={(e) =>
+                setEditCount(Math.max(1, Number(e.target.value)))
+              }
+              min="1"
+              className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        ) : (
+          <span
+            className={`
             flex-1 font-medium text-gray-900
             ${isResolved ? "font-normal text-gray-700 line-through" : ""}
           `}
-        >
-          <strong>{itemName}</strong> × {count}
-          {isResolved && <em className="ml-2 text-gray-600">(Solved)</em>}
-        </span>
-      )}
+          >
+            <strong>{itemName}</strong> × {count}
+            {isResolved && <em className="ml-2 text-gray-600">(Solved)</em>}
+          </span>
+        )}
 
-      {/* ---------- Right: Checkbox + Menu ---------- */}
-      <div className="flex items-center gap-2 relative">
-        <input
-          type="checkbox"
-          checked={isResolved}
-          onChange={handleToggle}
-          className={`
+        {/* ---------- Right: Checkbox + Menu ---------- */}
+        <div className="flex items-center gap-2 relative">
+          <input
+            type="checkbox"
+            checked={isResolved}
+            onChange={handleToggle}
+            className={`
             w-5 h-5 rounded cursor-pointer
           `}
-        />
+          />
 
-        <button
-          onClick={() => setIsMenuOpen((p) => !p)}
-          className="p-1 text-lg text-gray-700 hover:bg-gray-200 rounded"
-        >
-          ⋮
-        </button>
+          <button
+            onClick={() => setIsMenuOpen((p) => !p)}
+            className="p-1 text-lg text-gray-700 hover:bg-gray-200 rounded"
+          >
+            ⋮
+          </button>
 
-        {isMenuOpen && (
-          <div className="absolute right-0 top-6 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={handleRemove}
-                  className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </li>
-  );
+          {isMenuOpen && (
+            <div className="absolute right-0 top-6 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleSave}
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleRemove}
+                    className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </li>
+    );
+  }
 }
 
 ItemRow.propTypes = {

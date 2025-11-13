@@ -1,4 +1,4 @@
-export const CURRENT_USER_ID = "user-owner-123"; // Simulace aktuálně přihlášeného uživatele
+export const CURRENT_USER_ID = "user-member-456"; // Simulace aktuálně přihlášeného uživatele
 
 export let SHOPPING_LIST_DATA = {
   shopListId: "sl-1",

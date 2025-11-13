@@ -22,6 +22,7 @@ export function ShoppingList() {
   console.log("listData in ShoppingList", listData);
   console.log(members, "members in ShoppingList");
   // determine if current user can manage items
+
   const isOwner = ownerId === userId;
   const isMember = members.some((m) => m.userId === userId);
   const isManager = isOwner || isMember;

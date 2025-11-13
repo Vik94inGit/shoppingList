@@ -48,16 +48,6 @@ export default function MemberRow({
       return;
     }
 
-    if (isCurrentUser) {
-      const leave = window.confirm(
-        `Opravdu chcete opustit seznam? Budete odstraněni jako člen.`
-      );
-      if (!leave) return;
-
-      // Optional: special action for leaving
-      dispatch({ type: "LEAVE_LIST", payload: { memberId } });
-      return;
-    }
     if (!isListOwner) {
       alert("Nemáte oprávnění odstraňovat členy.");
       return;
@@ -74,12 +64,15 @@ export default function MemberRow({
   };
 
   const handleLeaveList = () => {
-    const confirmed = window.confirm(`Opravdu chcete opustit seznam?`);
-    if (confirmed) {
-      dispatch({
-        type: "LEAVE_LIST",
-        payload: { userId: currentUserId },
-      });
+    if (!isOwner && isCurrentUser === true) {
+      const confirmed = window.confirm(`Opravdu chcete opustit seznam?`);
+      if (confirmed) {
+        console.log("[MemberRow] Leaving list:", currentUserId);
+        dispatch({
+          type: "LEAVE_LIST",
+          payload: { userId: currentUserId },
+        });
+      }
     }
   };
 
