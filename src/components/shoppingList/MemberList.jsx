@@ -18,8 +18,7 @@ import Invite from "./Invite.jsx";
  *
  * LOGS: `[MemberList]` prefix
  */
-export function MemberList({ members, ownerId, userId, dispatch }) {
-  // AUTH + SAFETY
+export default function MemberList({ members, ownerId, userId, dispatch }) {
   const isOwner = ownerId === userId;
   const memberArray = Array.isArray(members) ? members : [];
 

@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useShoppingList } from "../../context/ShoppingListContext";
+import { useParams } from "react-router-dom";
 
 export default function ItemRow({ item }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.itemName);
   const [editCount, setEditCount] = useState(item.count);
-  const { listData } = useShoppingList();
-  const currentUserId = listData.userId;
+
+  const { state, currentUserId, dispatch } = useShoppingList();
+  const { lists } = state;
+  const { listId } = useParams(); // ← from URL: /list/sl-3
+  const list = lists.find((l) => l.shopListId === listId || l.id === listId);
+
+  // Loading / Not found
+  if (!list) {
+    return <p className="p-4 text-red-600">Seznam nenalezen.</p>;
+  }
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   // ← Wrap in useCallback to stabilize reference
@@ -17,7 +27,7 @@ export default function ItemRow({ item }) {
     }
   }, []); // ← No dependencies! setIsMenuOpen is stable
 
-  const isMember = listData.members.some((m) => m.userId === currentUserId);
+  const isMember = list.members.some((m) => m.userId === currentUserId);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -25,7 +35,6 @@ export default function ItemRow({ item }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [handleClickOutside]); // ← Only re-subscribe if handler changes
-  const { dispatch } = useShoppingList();
 
   if (!item || !item.itemId) return null;
   const { itemId, itemName, count, isResolved } = item;
@@ -33,7 +42,7 @@ export default function ItemRow({ item }) {
   const handleToggle = () => {
     dispatch({
       type: "TOGGLE_ITEM_RESOLVED",
-      payload: { itemId },
+      payload: { listId, itemId: item.id },
     });
   };
 

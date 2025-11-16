@@ -2,52 +2,39 @@ import { useState } from "react";
 import { useShoppingList } from "../context/ShoppingListContext";
 import { EditName } from "./shoppingList/EditName";
 import { DeleteListButton } from "./shoppingList/DeleteListButton";
-
-import { MemberList } from "./shoppingList/MemberList";
-import ItemsList from "./shoppingList/ItemsList"; // 👈 import ItemsList
+import { useParams } from "react-router-dom";
+import MemberList from "./shoppingList/MemberList";
+import ItemList from "./shoppingList/ItemList"; // 👈 import ItemsList
+import CreateItem from "./shoppingList/CreateItem";
 
 const FilterOptions = ["All", "Unsolved", "Solved"];
 
 export function ShoppingList() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
-  const [newName, setNewName] = useState("");
-  const [newCount, setNewCount] = useState("");
+
   const [isMembersListVisible, setIsMembersListVisible] = useState(false);
-  const { listData, dispatch } = useShoppingList();
+  const { listId } = useParams(); // ← from URL: /list/sl-3
+  const { state, currentUserId, dispatch } = useShoppingList();
+  const { lists } = state;
 
-  const { name, ownerId, members, items, shopListId } = listData;
+  const list = lists.find((l) => l.shopListId === listId || l.id === listId);
 
-  const userId = listData.userId;
-  console.log("listData in ShoppingList", listData);
+  // Loading / Not found
+  if (!list) {
+    return <p className="p-4 text-red-600">Seznam nenalezen.</p>;
+  }
+  const { name, ownerId, members = [], items = [], shopListId } = list;
+
+  const userId = list.currentUserId;
+  console.log("listData in ShoppingList", list);
   console.log(members, "members in ShoppingList");
   // determine if current user can manage items
 
-  const isOwner = ownerId === userId;
-  const isMember = members.some((m) => m.userId === userId);
+  const isOwner = ownerId === currentUserId;
+  const isMember = members.some((m) => m.userId === currentUserId);
   const isManager = isOwner || isMember;
-  console.log("[ShoppingList] listData:", listData);
-  const handleAddItem = () => {
-    // 1. Validation check
-    if (!newName) return;
-    console.log("listData in ShoppingList:", listData);
-
-    // 2. Dispatch action to reducer
-    dispatch({
-      type: "ADD_ITEM",
-      payload: {
-        shopListId,
-        // ❗ IMPORTANT FIX: Pass the state values, NOT the setter functions!
-        itemName: newName,
-        count: newCount,
-        userId,
-      },
-    });
-
-    // 3. Reset local state
-    setNewName("");
-    setNewCount("");
-  };
+  console.log("[ShoppingList] listData:", list);
 
   const resetListToDefault = () => {
     // Optional: ask the user to confirm – prevents accidental wipes
@@ -57,7 +44,7 @@ export function ShoppingList() {
 
     if (!confirmed) return;
     console.log("[Component] Dispatching RESET_LIST");
-    dispatch({ type: "RESET_LIST" });
+    dispatch({ type: "RESET_LIST", payload: { listId } });
   };
 
   const filteredItems = items.filter((item) => {
@@ -85,7 +72,7 @@ export function ShoppingList() {
               <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
             </EditName>
             <DeleteListButton
-              userId={userId}
+              userId={currentUserId}
               ownerId={ownerId}
               dispatch={dispatch}
             />
@@ -145,7 +132,7 @@ export function ShoppingList() {
               <MemberList
                 members={members}
                 ownerId={ownerId}
-                userId={userId}
+                userId={currentUserId}
                 dispatch={dispatch}
               />
             </div>
@@ -154,33 +141,10 @@ export function ShoppingList() {
       </header>
 
       {/* ---------- Items ---------- */}
-      <ItemsList items={filteredItems} dispatch={dispatch} />
+      <ItemList items={filteredItems} dispatch={dispatch} />
 
       {/* ---------- Add new item ---------- */}
-      {isManager && (
-        <div className="flex gap-2 mt-6">
-          <input
-            type="text"
-            placeholder="Item name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="number"
-            placeholder="Count"
-            value={newCount}
-            onChange={(e) => setNewCount(e.target.value)}
-            className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleAddItem}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          >
-            Add
-          </button>
-        </div>
-      )}
+      {isManager && <CreateItem userId={currentUserId} dispatch={dispatch} />}
     </div>
   );
 }

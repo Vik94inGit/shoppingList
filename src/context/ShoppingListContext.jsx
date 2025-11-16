@@ -1,49 +1,78 @@
-import { createContext, useContext, useReducer, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useState,
+} from "react";
 import {
   CURRENT_USER_ID,
   SHOPPING_LIST_DATA,
+  initialState,
 } from "../constants/initialData.js";
 import { ShoppingListReducer } from "./ShoppingListReducer.jsx";
-
+import { getListAuth } from "./ReducerHelper";
 const ShoppingListContext = createContext();
-export const loadInitialState = () => {
-  let listData = { ...SHOPPING_LIST_DATA };
-  try {
-    const saved = localStorage.getItem("shoppingList");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Only merge if it looks like a valid list
-      if (parsed && typeof parsed === "object" && parsed.shopListId) {
-        listData = parsed;
-      }
-    }
-  } catch (err) {
-    console.warn("[Context] Corrupted localStorage → resetting", err);
-    localStorage.removeItem("shoppingList");
-  }
-
-  return listData;
-};
 
 export function ShoppingListProvider({ children }) {
-  const [listData, dispatch] = useReducer(
-    ShoppingListReducer,
-    loadInitialState()
-  );
+  const [state, dispatch] = useReducer(ShoppingListReducer, initialState);
+  const [currentUserId, setCurrentUserId] = useState(CURRENT_USER_ID);
 
   // Save to localStorage on every change
   useEffect(() => {
-    try {
-      localStorage.setItem("shoppingList", JSON.stringify(listData));
-    } catch (err) {
-      console.error("[Context] Save failed", err);
-    }
-  }, [listData]);
+    const load = async () => {
+      try {
+        const saved = localStorage.getItem("shoppingLists");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            dispatch({ type: "LOAD_LISTS", payload: parsed });
+          }
+        } else {
+          // No saved data → use mock data
+          dispatch({ type: "LOAD_LISTS", payload: SHOPPING_LIST_DATA });
+        }
+      } catch (err) {
+        console.warn("[Context] Load failed", err);
+        // Fallback to mock data
+        dispatch({ type: "LOAD_LISTS", payload: SHOPPING_LIST_DATA });
+      } finally {
+        dispatch({ type: "SET_LOADING", payload: false }); // ← CRITICAL
+      }
+    };
+    load();
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (!state.loading) {
+      localStorage.setItem("shoppingLists", JSON.stringify(state.lists));
+    }
+  }, [state.lists, state.loading]);
+
+  // === 3. Helper to get auth for any list ===
+  const getListAuthFor = (listId) =>
+    getListAuth(state.lists, listId, currentUserId);
+
+  // === 4. Login / Switch User (for demo) ===
+  const loginAs = (userId) => {
+    setCurrentUserId(userId);
+    localStorage.setItem("currentUserId", userId);
+  };
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("currentUserId");
+    if (savedUser) setCurrentUserId(savedUser);
+  }, []);
+  1;
   const value = {
-    listData, // ← { name, items, members, ... }
-    userId: CURRENT_USER_ID, // ← for auth, never in localStorage
+    state: {
+      lists: state.lists,
+      loading: state.loading,
+    },
+    currentUserId,
     dispatch,
+    getListAuth: getListAuthFor,
+    loginAs,
   };
 
   return (

@@ -1,13 +1,10 @@
 // src/components/shoppingList/EditName.jsx
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useShoppingList } from "../../context/ShoppingListContext";
 
-export function EditName({ name, ownerId, children }) {
+export function EditName({ name, dispatch, shopListId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(name);
-
-  const { dispatch, userId } = useShoppingList();
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -31,7 +28,7 @@ export function EditName({ name, ownerId, children }) {
 
     dispatch({
       type: "RENAME_LIST",
-      payload: { newName: trimmed },
+      payload: { listId: shopListId, newName: trimmed },
     });
 
     setIsEditing(false);
@@ -63,7 +60,6 @@ export function EditName({ name, ownerId, children }) {
         </form>
       ) : (
         <div className="flex gap-4">
-          {children}
           {/* TODO: replace with pen icon */}
           <button onClick={handleEditClick}>✏️</button>
         </div>

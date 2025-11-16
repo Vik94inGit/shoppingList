@@ -1,134 +1,195 @@
-import { SHOPPING_LIST_DATA, CURRENT_USER_ID } from "../constants/initialData"; // src/context/shoppingListReducer.js
+import { SHOPPING_LIST_DATA } from "../constants/initialData";
+
+const save = (state) => {
+  try {
+    localStorage.setItem("shoppingLists", JSON.stringify(state.lists));
+  } catch (err) {
+    console.warn("[Reducer] Failed to save to localStorage", err);
+  }
+  return state;
+};
 
 export const ShoppingListReducer = (state, action) => {
-  // Pro autorizaci předpokládáme, že userId je v action.payload (nebo získáno z externího Contextu)
-  const { ownerId, members } = state;
-  const userId = action.payload?.userId ?? CURRENT_USER_ID; // fallback for old actions
-  const isOwner = action.payload?.userId === ownerId;
-  const isMember = members.some((m) => m.userId === action.payload?.userId);
-  const isManager = isOwner || isMember;
+  console.log("[Reducer] Action:", action.type, action.payload);
 
-  // Helper – apply change & persist to initialData
-  const save = (state) => {
-    try {
-      localStorage.setItem("shoppingList", JSON.stringify(state));
-    } catch (err) {
-      console.error("Failed to save to localStorage:", err);
-    }
-    return state;
-  };
+  let updatedLists;
 
   switch (action.type) {
-    // --- LOGIKA SEZNAMU (Vlastník) ---
-    case "RENAME_LIST":
-      console.log("[Reducer] Renaming to:", action.payload.newName);
-      return save({ ...state, name: action.payload.newName });
+    // --- PŘEJMENOVÁNÍ SEZNAMU ---
+    case "RENAME_LIST": {
+      const { listId, newName } = action.payload || {};
+      if (!listId || !newName) return state;
 
-    case "UPDATE_ITEM":
-      return save({
-        ...state,
-        items: state.items.map((item) =>
-          item.itemId === action.payload.itemId
-            ? { ...item, itemName: action.payload.itemName }
-            : item
-        ),
-      });
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? { ...list, name: newName }
+          : list
+      );
 
-    case "DELETE_LIST":
-      console.log("[Reducer] DELETE_LIST received"); // ← ADD THIS
-      localStorage.removeItem("shoppingList");
-      const empty = {
-        shopListId: null,
-        name: "Seznam smazán",
-        ownerId: null,
-        members: [],
-        items: [],
-      };
-      return save(empty);
+      return save({ ...state, lists: updatedLists });
+    }
 
-    // --- LOGIKA ČLENŮ (Owner / Member) ---
-    case "ADD_MEMBER":
-      if (!isOwner) return state;
-      const newMember = {
-        userId: `user-${Date.now()}`,
-        userName: action.payload.userName,
-        email: action.payload.email,
-      };
-      return save({ ...state, members: [...members, newMember] });
+    // --- PŘIDÁNÍ ČLENA ---
+    case "ADD_MEMBER": {
+      const { listId, userId, userName, email } = action.payload;
+      if (!listId || !userId) return state;
 
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? {
+              ...list,
+              members: [
+                ...(Array.isArray(list.members) ? list.members : []),
+                { userId, userName, email: email || "" },
+              ],
+            }
+          : list
+      );
+
+      return save({ ...state, lists: updatedLists });
+    }
+
+    // --- ODEBRÁNÍ ČLENA ---
     case "REMOVE_MEMBER": {
-      const { memberId: memberIdToRemove, currentUserId } = action.payload;
+      const { listId, memberId } = action.payload;
+      if (!listId || !memberId) return state;
 
-      console.log("REMOVE_MEMBER →", {
-        memberIdToRemove,
-        ownerId: state.ownerId,
-        currentUserId,
-      });
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? {
+              ...list,
+              members: list.members.filter((m) => m.userId !== memberId),
+            }
+          : list
+      );
 
-      // 1. Cannot remove owner
-      if (memberIdToRemove === state.ownerId) {
-        console.warn("BLOCKED: Cannot remove owner");
-        return state;
-      }
-
-      return {
-        ...state,
-        members: state.members.filter((m) => m.userId !== memberIdToRemove),
-      };
+      return save({ ...state, lists: updatedLists });
     }
 
-    case "LEAVE_LIST": {
-      const { userId: leavingUserId } = action.payload;
+    // --- PŘIDÁNÍ POLOŽKY ---
+    case "ADD_ITEM": {
+      const { listId, itemName, count = 1 } = action.payload;
+      if (!listId || !itemName) return state;
 
-      console.log("[Reducer] LEAVE_LIST →", { leavingUserId, ownerId });
-
-      // 1. Owner cannot leave
-      if (leavingUserId === state.ownerId) {
-        console.warn("BLOCKED: Owner cannot leave the list");
-        return state;
-      }
-
-      return save({
-        ...state,
-        members: state.members.filter((m) => m.userId !== leavingUserId),
-      });
-    }
-
-    // --- LOGIKA POLOŽEK (Owner / Member) ---
-    case "ADD_ITEM":
-      if (!isManager) return state;
       const newItem = {
-        itemId: Date.now().toString(),
-        itemName: action.payload.itemName,
-        count: action.payload.count || 1,
+        id: `item-${Date.now()}`,
+        itemName,
+        count,
         isResolved: false,
       };
-      return save({ ...state, items: [...state.items, newItem] });
 
-    case "RESET_LIST":
-      console.log("[Reducer] RESET_LIST received");
-      return save(SHOPPING_LIST_DATA);
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? { ...list, items: [...list.items, newItem] }
+          : list
+      );
 
-    case "TOGGLE_ITEM_RESOLVED":
-      return save({
-        ...state,
-        items: state.items.map((item) =>
-          item.itemId === action.payload.itemId
-            ? { ...item, isResolved: !item.isResolved }
-            : item
-        ),
-      });
+      return save({ ...state, lists: updatedLists });
+    }
 
-    case "REMOVE_ITEM":
-      const { itemId } = action.payload;
+    // --- TOGGLE POLOŽKY ---
+    case "TOGGLE_ITEM_RESOLVED": {
+      const { listId, itemId } = action.payload;
+      if (!listId || !itemId) return state;
 
-      console.log("REMOVE_ITEM → filtering out:", itemId);
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? {
+              ...list,
+              items: list.items.map((i) =>
+                i.id === itemId ? { ...i, isResolved: !i.isResolved } : i
+              ),
+            }
+          : list
+      );
 
-      return save({
-        ...state,
+      return save({ ...state, lists: updatedLists });
+    }
 
-        items: state.items.filter((item) => item.itemId !== itemId),
-      });
+    // --- ODEBRÁNÍ POLOŽKY ---
+    case "REMOVE_ITEM": {
+      const { listId, itemId } = action.payload;
+      if (!listId || !itemId) return state;
+
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? { ...list, items: list.items.filter((i) => i.id !== itemId) }
+          : śled
+      );
+
+      return save({ ...state, lists: updatedLists });
+    }
+
+    // --- RESET JEDNOHO SEZNAMU ---
+    case "RESET_LIST": {
+      const listId = action.payload?.listId;
+      if (!listId) return state;
+
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? { ...list, items: [], members: [{ userId: list.ownerId }] }
+          : list
+      );
+
+      return save({ ...state, lists: updatedLists });
+    }
+
+    // --- ODEJÍT ZE SEZNAMU ---
+    case "LEAVE_LIST": {
+      const { listId, userId } = action.payload;
+      if (!listId || !userId) return state;
+
+      updatedLists = state.lists.map((list) =>
+        list.shopListId === listId || list.id === listId
+          ? {
+              ...list,
+              members: list.members.filter((m) => m.userId !== userId),
+            }
+          : list
+      );
+
+      return save({ ...state, lists: updatedLists });
+    }
+
+    // --- SMAZÁNÍ SEZNAMU ---
+    case "DELETE_LIST": {
+      const listId = action.payload?.listId;
+      if (!listId) return state;
+
+      updatedLists = state.lists.filter(
+        (list) => list.shopListId !== listId && list.id !== listId
+      );
+
+      return save({ ...state, lists: updatedLists });
+    }
+
+    // --- NAČTENÍ SEZNAMŮ ---
+    case "LOAD_LISTS": {
+      const listsArray = Array.isArray(action.payload)
+        ? action.payload
+        : Object.values(action.payload || {});
+
+      return save({ ...state, lists: listsArray, loading: false });
+    }
+
+    // --- RESET HOMEPAGE ---
+    case "RESET_HOMEPAGE": {
+      return save({ ...state, lists: SHOPPING_LIST_DATA, loading: false });
+    }
+
+    // --- PŘIDÁNÍ NOVÉHO SEZNAMU ---
+    case "ADD_LIST": {
+      const newList = {
+        shopListId: `sl-${Date.now()}`,
+        ...action.payload,
+        items: [],
+        members: [{ userId: action.payload.ownerId }],
+      };
+      return save({ ...state, lists: [...state.lists, newList] });
+    }
+
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
 
     default:
       return state;
