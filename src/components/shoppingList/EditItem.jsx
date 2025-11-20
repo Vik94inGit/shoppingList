@@ -1,6 +1,6 @@
 // src/components/shoppingList/forms/ItemForm.jsx
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from "react"
+import PropTypes from "prop-types"
 
 /**
  * ITEMFORM – REUSABLE FORM FOR CREATE & EDIT
@@ -25,43 +25,42 @@ export default function ItemForm({
   onCancel,
   submitLabel = "Uložit",
 }) {
-  const [name, setName] = useState(initialName);
-  const [count, setCount] = useState(initialCount);
+  const [name, setName] = useState(initialName)
+  const [count, setCount] = useState(initialCount)
 
   // INPUT HANDLERS
   const handleNameChange = (e) => {
-    const value = e.target.value;
-    setName(value);
-  };
+    const value = e.target.value
+    setName(value)
+  }
 
   const handleCountChange = (e) => {
-    const raw = e.target.value;
-    const enforced = raw === "" ? "" : Math.max(1, Number(raw));
-    setCount(enforced);
-  };
+    const raw = e.target.value
+    const enforced = raw === "" ? "" : Math.max(1, Number(raw))
+    setCount(enforced)
+  }
 
   // SUBMIT
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const trimmed = name.trim();
+    const trimmed = name.trim()
 
     if (!trimmed) {
-      console.log(`[ItemForm] Validation FAILED: empty name`);
-      return;
+      return
     }
 
-    const parsedCount = parseInt(count, 10) || 1;
+    const parsedCount = parseInt(count, 10) || 1
 
-    const payload = { itemName: trimmed, count: parsedCount };
+    const payload = { itemName: trimmed, count: parsedCount }
 
-    onSubmit(payload);
-  };
+    onSubmit(payload)
+  }
 
   // CANCEL
   const handleCancel = () => {
-    onCancel();
-  };
+    onCancel()
+  }
 
   return (
     <form
@@ -149,7 +148,7 @@ export default function ItemForm({
         </button>
       )}
     </form>
-  );
+  )
 }
 
 // PropTypes
@@ -159,11 +158,11 @@ ItemForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func,
   submitLabel: PropTypes.string,
-};
+}
 
 ItemForm.defaultProps = {
   initialName: "",
   initialCount: 1,
   onCancel: null,
   submitLabel: "Uložit",
-};
+}

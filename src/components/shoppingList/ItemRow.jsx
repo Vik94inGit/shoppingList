@@ -1,76 +1,80 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import PropTypes from "prop-types";
-import { useShoppingList } from "../../context/ShoppingListContext";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react"
+import PropTypes from "prop-types"
+import { useShoppingList } from "../../context/ShoppingListContext"
+import { useParams } from "react-router-dom"
+import { actionTypes } from "../../context/ReducerHelper"
 
 export default function ItemRow({ item }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(item.itemName);
-  const [editCount, setEditCount] = useState(item.count);
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(item.itemName)
+  const [editCount, setEditCount] = useState(item.count)
 
-  const { state, currentUserId, dispatch } = useShoppingList();
-  const { lists } = state;
-  const { listId } = useParams(); // ← from URL: /list/sl-3
-  const list = lists.find((l) => l.shopListId === listId || l.id === listId);
+  const { state, currentUserId, dispatch } = useShoppingList()
+  const { lists } = state
+  const { listId } = useParams() // ← from URL: /list/sl-3
+  const list = lists.find((l) => l.shopListId === listId || l.id === listId)
 
-  // Loading / Not found
-  if (!list) {
-    return <p className="p-4 text-red-600">Seznam nenalezen.</p>;
-  }
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef(null)
   // ← Wrap in useCallback to stabilize reference
   const handleClickOutside = useCallback((event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setIsMenuOpen(false);
+      setIsMenuOpen(false)
     }
-  }, []); // ← No dependencies! setIsMenuOpen is stable
+  }, []) // ← No dependencies! setIsMenuOpen is stable
 
-  const isMember = list.members.some((m) => m.userId === currentUserId);
+  const isMember = list.members.some((m) => m.userId === currentUserId)
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [handleClickOutside]); // ← Only re-subscribe if handler changes
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [handleClickOutside]) // ← Only re-subscribe if handler changes
 
-  if (!item || !item.itemId) return null;
-  const { itemId, itemName, count, isResolved } = item;
+  if (!item || !item.itemId) return null
+  const { itemId, itemName, count, isResolved } = item
 
   const handleToggle = () => {
     dispatch({
-      type: "TOGGLE_ITEM_RESOLVED",
-      payload: { listId, itemId: item.id },
-    });
-  };
+      type: actionTypes.toggleItemResolved,
+      payload: { listId, itemId },
+    })
+  }
 
   const handleSave = () => {
-    const trimmedName = editName.trim();
-    if (!trimmedName) return;
+    const trimmedName = editName.trim()
+    if (!trimmedName) return
     dispatch({
-      type: "UPDATE_ITEM",
-      payload: { itemId, itemName: trimmedName, count: editCount },
-    });
-    setIsEditing(false);
-    setIsMenuOpen(false);
-  };
+      type: actionTypes.updateItem,
+      payload: {
+        itemId,
+        itemName: trimmedName,
+        count: editCount,
+        listId,
+      },
+    })
+    setIsEditing(false)
+    setIsMenuOpen(false)
+  }
 
   const handleCancel = () => {
-    setEditName(itemName);
-    setEditCount(count);
-    setIsEditing(false);
-    setIsMenuOpen(false);
-  };
+    setEditName(itemName)
+    setEditCount(count)
+    setIsEditing(false)
+    setIsMenuOpen(false)
+  }
 
   const handleRemove = () => {
-    if (window.confirm(`Opravdu smazat "${itemName}"?`)) {
-      console.log("Removing item with ID:", itemId);
-      dispatch({ type: "REMOVE_ITEM", payload: { itemId } });
-    }
-    setIsMenuOpen(false);
-  };
+    if (!window.confirm(`Opravdu smazat "${itemName}"?`)) return
+    dispatch({ type: actionTypes.removeItem, payload: { itemId, listId } })
+    setIsMenuOpen(false)
+  }
+
+  // Loading / Not found
+  if (!list) {
+    return <p className="p-4 text-red-600">Seznam nenalezen.</p>
+  }
 
   if (isMember) {
     return (
@@ -102,13 +106,15 @@ export default function ItemRow({ item }) {
             />
           </div>
         ) : (
-          <span
-            className={`
+          <span>
+            <span
+              className={`
             flex-1 font-medium text-gray-900
             ${isResolved ? "font-normal text-gray-700 line-through" : ""}
           `}
-          >
-            <strong>{itemName}</strong> × {count}
+            >
+              <strong>{itemName}</strong> × {count}
+            </span>
             {isResolved && <em className="ml-2 text-gray-600">(Solved)</em>}
           </span>
         )}
@@ -168,7 +174,7 @@ export default function ItemRow({ item }) {
           )}
         </div>
       </li>
-    );
+    )
   }
 }
 
@@ -179,4 +185,4 @@ ItemRow.propTypes = {
     count: PropTypes.number.isRequired,
     isResolved: PropTypes.bool.isRequired,
   }).isRequired,
-};
+}

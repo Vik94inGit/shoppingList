@@ -1,6 +1,8 @@
 // src/components/shoppingList/MemberRow.jsx
-import React from "react";
-import PropTypes from "prop-types";
+import React from "react"
+import PropTypes from "prop-types"
+import { actionTypes } from "../../context/ReducerHelper"
+import { useParams } from "react-router-dom"
 
 /**
  * MEMBERROW – SINGLE MEMBER WITH REMOVE/LEAVE ACTION
@@ -21,71 +23,70 @@ export default function MemberRow({
   currentUserId,
   dispatch,
 }) {
+  const { listId } = useParams()
   //
-  console.log("[MemberRow] member prop:", member, ownerId, currentUserId);
   // 1. DEFENSIVE CHECK
   // -------------------------------------------------
   if (!member || !member.userId) {
-    console.warn("[MemberRow] Invalid member prop:", member);
-    return null;
+    console.warn("[MemberRow] Invalid member prop:", member)
+    return null
   }
 
-  const { userId: memberId, userName, email } = member;
+  const { userId: memberId, userName, email } = member
 
   // -------------------------------------------------
   // 2. AUTH FLAGS
   // -------------------------------------------------
-  const isOwner = ownerId === memberId;
-  const isCurrentUser = currentUserId === memberId;
-  const isListOwner = currentUserId === ownerId;
+
+  const isOwner = ownerId === memberId
+  const isCurrentUser = currentUserId === memberId
+  const isListOwner = currentUserId === ownerId
 
   // -------------------------------------------------
   // 3. ACTION HANDLERS
   // -------------------------------------------------
   const handleRemoveOther = () => {
     if (isOwner) {
-      alert("Nelze odstranit vlastníka seznamu.");
-      return;
+      alert("Nelze odstranit vlastníka seznamu.")
+      return
     }
 
     if (!isListOwner) {
-      alert("Nemáte oprávnění odstraňovat členy.");
-      return;
+      alert("Nemáte oprávnění odstraňovat členy.")
+      return
     }
     const confirmed = window.confirm(
       `You really want to remove **${userName}** (${email})?`
-    );
+    )
     if (confirmed) {
       dispatch({
-        type: "REMOVE_MEMBER",
-        payload: { memberId, currentUserId },
-      });
+        type: actionTypes.removeMember,
+        payload: { memberId, userId: currentUserId, listId },
+      })
     }
-  };
+  }
 
   const handleLeaveList = () => {
-    if (!isOwner && isCurrentUser === true) {
-      const confirmed = window.confirm(`Opravdu chcete opustit seznam?`);
-      if (confirmed) {
-        console.log("[MemberRow] Leaving list:", currentUserId);
-        dispatch({
-          type: "LEAVE_LIST",
-          payload: { userId: currentUserId },
-        });
-      }
+    if (!isOwner && isCurrentUser) {
+      if (!window.confirm(`Opravdu chcete opustit seznam?`)) return
+
+      dispatch({
+        type: actionTypes.leaveList,
+        payload: { userId: currentUserId, listId },
+      })
     }
-  };
+  }
 
   // -------------------------------------------------
   // 4. ROLE BADGE
   // -------------------------------------------------
   const getRoleBadge = () => {
-    if (isOwner) return { text: "Owner", color: "#d4af37", icon: "Owner" };
-    if (isCurrentUser) return { text: "You", color: "#007bff", icon: "You" };
-    return { text: "Member", color: "#6c757d", icon: "" };
-  };
+    if (isOwner) return { text: "Owner", color: "#d4af37", icon: "Owner" }
+    if (isCurrentUser) return { text: "You", color: "#007bff", icon: "You" }
+    return { text: "Member", color: "#6c757d", icon: "" }
+  }
 
-  const role = getRoleBadge();
+  const role = getRoleBadge()
 
   // -------------------------------------------------
   // 5. RENDER
@@ -172,7 +173,7 @@ export default function MemberRow({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 // -------------------------------------------------
@@ -187,4 +188,4 @@ MemberRow.propTypes = {
   ownerId: PropTypes.string.isRequired,
   currentUserId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
-};
+}

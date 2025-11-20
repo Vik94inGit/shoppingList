@@ -1,15 +1,16 @@
 // src/components/shoppingList/CreateListModal.jsx
-import { useState, useCallback } from "react";
-import { useShoppingList } from "../../context/ShoppingListContext";
-import MemberList from "../shoppingList/MemberList";
-import ItemList from "../shoppingList/ItemList"; // ← your ItemsList (renamed)
+import { useState, useCallback } from "react"
+import { useShoppingList } from "../../context/ShoppingListContext"
+import { MemberList, MembersListContent } from "../shoppingList/MemberList"
+import ItemList from "../shoppingList/ItemList" // ← your ItemsList (renamed)
+import { actionTypes } from "../../context/ReducerHelper"
 
 export default function CreateListModal({ isOpen, onClose }) {
-  const { currentUserId, dispatch } = useShoppingList();
+  const { currentUserId, dispatch } = useShoppingList()
 
   // ── Form state ─────────────────────────────────────────────────────
-  const [name, setName] = useState("");
-  const [items, setItems] = useState([]);
+  const [name, setName] = useState("")
+  const [items, setItems] = useState([])
   const [members, setMembers] = useState([
     {
       userId: currentUserId,
@@ -17,35 +18,34 @@ export default function CreateListModal({ isOpen, onClose }) {
       email: "",
       role: "owner",
     },
-  ]);
+  ])
 
   // ── Dropdown state ─────────────────────────────────────────────────
-  const [membersOpen, setMembersOpen] = useState(true);
-  const [itemsOpen, setItemsOpen] = useState(true);
+  const [membersOpen, setMembersOpen] = useState(true)
+  const [itemsOpen, setItemsOpen] = useState(true)
 
   // ── Handlers ───────────────────────────────────────────────────────
 
   const handleSubmit = useCallback(() => {
     if (!name.trim()) {
-      alert("Zadejte název seznamu");
-      return;
+      alert("Zadejte název seznamu")
+      return
     }
 
     const newList = {
-      id: `sl-${Date.now()}`,
       name: name.trim(),
       ownerId: currentUserId,
       members,
       items: items.map((i) => ({ ...i, isArchieved: false })),
-    };
+    }
 
-    dispatch({ type: "CREATE_LIST", payload: newList });
-    onClose();
-  }, [name, currentUserId, members, items, dispatch, onClose]);
+    dispatch({ type: actionTypes.addList, payload: newList })
+    onClose()
+  }, [name, currentUserId, members, items, dispatch, onClose])
 
   const handleClose = useCallback(() => {
-    setName("");
-    setItems([]);
+    setName("")
+    setItems([])
     setMembers([
       {
         userId: currentUserId,
@@ -53,13 +53,13 @@ export default function CreateListModal({ isOpen, onClose }) {
         email: "",
         role: "owner",
       },
-    ]);
-    setMembersOpen(true);
-    setItemsOpen(true);
-    onClose();
-  }, [currentUserId, onClose]);
+    ])
+    setMembersOpen(true)
+    setItemsOpen(true)
+    onClose()
+  }, [currentUserId, onClose])
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -93,11 +93,12 @@ export default function CreateListModal({ isOpen, onClose }) {
             </button>
             {membersOpen && (
               <div className="border border-t-0 border-gray-300 rounded-b-md p-4 bg-gray-50">
-                <MemberList
+                <MembersListContent
                   members={members}
-                  ownerId={ownerId}
-                  userId={userId}
+                  ownerId={"ownerId"}
+                  userId={"userId"}
                   dispatch={dispatch}
+                  currentUserId={currentUserId}
                 />
               </div>
             )}
@@ -139,5 +140,5 @@ export default function CreateListModal({ isOpen, onClose }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

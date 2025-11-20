@@ -1,65 +1,62 @@
-import { useState } from "react";
-import { useShoppingList } from "../context/ShoppingListContext";
-import { EditName } from "./shoppingList/EditName";
-import { DeleteListButton } from "./shoppingList/DeleteListButton";
-import { useParams } from "react-router-dom";
-import MemberList from "./shoppingList/MemberList";
-import ItemList from "./shoppingList/ItemList"; // 👈 import ItemsList
-import CreateItem from "./shoppingList/CreateItem";
+import { useState } from "react"
+import { useShoppingList } from "../context/ShoppingListContext"
+import { EditName } from "./shoppingList/EditName"
+import { DeleteListButton } from "./shoppingList/DeleteListButton"
+import { useParams } from "react-router-dom"
+import { MemberList } from "./shoppingList/MemberList"
+import ItemList from "./shoppingList/ItemList" // 👈 import ItemsList
+import CreateItem from "./shoppingList/CreateItem"
+import { actionTypes } from "../context/ReducerHelper"
 
-const FilterOptions = ["All", "Unsolved", "Solved"];
+const FilterOptions = ["All", "Unsolved", "Solved"]
 
 export function ShoppingList() {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+  const [activeFilter, setActiveFilter] = useState("All")
 
-  const [isMembersListVisible, setIsMembersListVisible] = useState(false);
-  const { listId } = useParams(); // ← from URL: /list/sl-3
-  const { state, currentUserId, dispatch } = useShoppingList();
-  const { lists } = state;
+  const [isMembersListVisible, setIsMembersListVisible] = useState(false)
+  const { listId } = useParams() // ← from URL: /list/sl-3
+  const { state, currentUserId, dispatch } = useShoppingList()
+  const { lists } = state
 
-  const list = lists.find((l) => l.shopListId === listId || l.id === listId);
+  const list = lists.find((l) => l.shopListId === listId || l.id === listId)
 
   // Loading / Not found
   if (!list) {
-    return <p className="p-4 text-red-600">Seznam nenalezen.</p>;
+    return <p className="p-4 text-red-600">Seznam nenalezen.</p>
   }
-  const { name, ownerId, members = [], items = [], shopListId } = list;
+  const { name, ownerId, members = [], items = [], shopListId } = list
 
-  const userId = list.currentUserId;
-  console.log("listData in ShoppingList", list);
-  console.log(members, "members in ShoppingList");
   // determine if current user can manage items
 
-  const isOwner = ownerId === currentUserId;
-  const isMember = members.some((m) => m.userId === currentUserId);
-  const isManager = isOwner || isMember;
-  console.log("[ShoppingList] listData:", list);
+  const isOwner = ownerId === currentUserId
+  const isMember = members.some((m) => m.userId === currentUserId)
+  const isManager = isOwner || isMember
 
   const resetListToDefault = () => {
     // Optional: ask the user to confirm – prevents accidental wipes
     const confirmed = window.confirm(
       "Opravdu chcete resetovat seznam na výchozí stav? Všechny změny budou ztraceny."
-    );
+    )
 
-    if (!confirmed) return;
-    console.log("[Component] Dispatching RESET_LIST");
-    dispatch({ type: "RESET_LIST", payload: { listId } });
-  };
+    if (!confirmed) return
+    dispatch({ type: actionTypes.resetList, payload: { listId } })
+  }
 
   const filteredItems = items.filter((item) => {
-    if (activeFilter === "Solved") return item.isResolved;
-    if (activeFilter === "Unsolved") return !item.isResolved;
-    return true; // "All"
-  });
+    if (activeFilter === "Solved") return item.isResolved
+    if (activeFilter === "Unsolved") return !item.isResolved
+    return true // "All"
+  })
 
   const toggleMembers = () => {
-    setIsMembersListVisible((p) => !p); // Toggle visibility
-  };
+    setIsMembersListVisible((p) => !p) // Toggle visibility
+  }
 
   return (
     <div className="p-4">
-      <header className="flex justify-between items-center mb-4 relative">
+      <a href="/">{`<- back to list`}</a>
+      <header className="flex justify-between items-center my-4 relative">
         {/* ---------- Header ---------- */}
         {isOwner ? (
           <div className="flex gap-4">
@@ -95,8 +92,8 @@ export function ShoppingList() {
               <button
                 key={filter}
                 onClick={() => {
-                  setActiveFilter(filter);
-                  setIsPopoverOpen(false);
+                  setActiveFilter(filter)
+                  setIsPopoverOpen(false)
                 }}
                 className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100 ${
                   activeFilter === filter ? "font-bold bg-gray-100" : ""
@@ -132,7 +129,7 @@ export function ShoppingList() {
               <MemberList
                 members={members}
                 ownerId={ownerId}
-                userId={currentUserId}
+                currentUserId={currentUserId}
                 dispatch={dispatch}
               />
             </div>
@@ -141,10 +138,20 @@ export function ShoppingList() {
       </header>
 
       {/* ---------- Items ---------- */}
-      <ItemList items={filteredItems} dispatch={dispatch} />
+      <ItemList
+        items={filteredItems}
+        dispatch={dispatch}
+        shopListId={shopListId}
+      />
 
       {/* ---------- Add new item ---------- */}
-      {isManager && <CreateItem userId={currentUserId} dispatch={dispatch} />}
+      {isManager && (
+        <CreateItem
+          userId={currentUserId}
+          dispatch={dispatch}
+          shopListId={shopListId}
+        />
+      )}
     </div>
-  );
+  )
 }

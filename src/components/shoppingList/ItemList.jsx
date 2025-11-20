@@ -1,7 +1,7 @@
 // src/components/shoppingList/ItemsList.jsx (VYČIŠTĚNÁ VERZE)
 
-import React from "react";
-import ItemRow from "./ItemRow";
+import React from "react"
+import ItemRow from "./ItemRow"
 // POZNÁMKA: useState a PropTypes již nejsou potřeba, protože se nepoužívají.
 
 // Komponenta pro vykreslení PŘEDFILTROVANÉHO seznamu položek.
@@ -18,7 +18,7 @@ export default function ItemList({
           // Mapování a vykreslení filtrovaných položek.
           items.map((item) => (
             <ItemRow
-              key={`${shopListId}-$item.itemId}`}
+              key={`${shopListId}-${item.itemId}}`}
               item={item}
               dispatch={dispatch}
             />
@@ -33,5 +33,5 @@ export default function ItemList({
         )}
       </ul>
     </div>
-  );
+  )
 }

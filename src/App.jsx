@@ -1,7 +1,7 @@
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import { ShoppingList } from "./components/ShoppingList.jsx";
-import HomePage from "./components/homePage/homePage.jsx";
-import { ShoppingListProvider } from "./context/ShoppingListContext.jsx";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { ShoppingList } from "./components/ShoppingList.jsx"
+import HomePage from "./components/homePage/homePage.jsx"
+import { ShoppingListProvider } from "./context/ShoppingListContext.jsx"
 
 export function App() {
   return (
@@ -13,5 +13,5 @@ export function App() {
         </Routes>
       </Router>
     </ShoppingListProvider>
-  );
+  )
 }

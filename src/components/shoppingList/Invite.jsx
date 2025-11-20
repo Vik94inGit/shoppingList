@@ -1,6 +1,7 @@
 // src/components/shoppingList/Invite.jsx
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from "react"
+import PropTypes from "prop-types"
+import { actionTypes } from "../../context/ReducerHelper"
 
 /**
  * INVITE COMPONENT – OWNER-ONLY INVITATION FORM
@@ -16,39 +17,34 @@ import PropTypes from "prop-types";
  */
 export default function Invite({ userId, dispatch, isOwner }) {
   // LOCAL STATE
-  const [email, setEmail] = useState("");
-  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("")
+  const [userName, setUserName] = useState("")
 
   // OWNER CHECK
   if (!isOwner) {
-    console.log(
-      `[Invite] Non-owner (userId="${userId}") → component NOT rendered`
-    );
-    return null;
+    return null
   }
 
   // HANDLE INPUT CHANGES
   const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-  };
+    const value = e.target.value
+    setEmail(value)
+  }
 
   const handleNameChange = (e) => {
-    const value = e.target.value;
-    setUserName(value);
-  };
+    const value = e.target.value
+    setUserName(value)
+  }
 
   // HANDLE SUBMIT
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("[Invite] handleSubmit CALLED!");
+    e.preventDefault()
     // TRIM & VALIDATE
-    const trimmedEmail = email.trim();
-    const trimmedName = userName.trim();
+    const trimmedEmail = email.trim()
+    const trimmedName = userName.trim()
 
     if (!trimmedEmail || !trimmedName) {
-      console.log(`[Invite] Validation FAILED: missing email or name`);
-      return;
+      return
     }
 
     // PAYLOAD
@@ -56,18 +52,18 @@ export default function Invite({ userId, dispatch, isOwner }) {
       email: trimmedEmail,
       userName: trimmedName,
       userId: userId,
-    };
+    }
 
     // DISPATCH → Reducer handles invitation
     dispatch({
-      type: "ADD_MEMBER",
+      type: actionTypes.addMember,
       payload,
-    });
+    })
 
     // RESET FORM
-    setEmail("");
-    setUserName("");
-  };
+    setEmail("")
+    setUserName("")
+  }
 
   return (
     <div
@@ -156,7 +152,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
 
       {/* DEBUG NOTE */}
     </div>
-  );
+  )
 }
 
 // PropTypes – runtime validation
@@ -164,4 +160,4 @@ Invite.propTypes = {
   userId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
   isOwner: PropTypes.bool.isRequired,
-};
+}

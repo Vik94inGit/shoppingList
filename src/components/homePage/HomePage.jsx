@@ -1,27 +1,28 @@
-import { useState, useMemo, useCallback } from "react";
-import { useShoppingList } from "../../context/ShoppingListContext";
-import ShoppingListCard from "./ShoppingListCard";
-import CreateListModal from "./CreateList";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useCallback } from "react"
+import { useShoppingList } from "../../context/ShoppingListContext"
+import ShoppingListCard from "./ShoppingListCard"
+import CreateListModal from "./CreateList"
+import { useNavigate } from "react-router-dom"
+import { actionTypes } from "../../context/ReducerHelper"
 
 export default function HomePage() {
   // ── UI state ─────────────────────────────────────────────────────
-  const [filter, setFilter] = useState("all"); // "all" | "owned" | "shared"
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [filter, setFilter] = useState("all") // "all" | "owned" | "shared"
+  const [modalOpen, setModalOpen] = useState(false)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   // ── Global state ─────────────────────────────────────────────────
-  const { state, currentUserId, dispatch } = useShoppingList();
-  const { lists, loading } = state;
-  const navigate = useNavigate(); // ← for navigation
+  const { state, currentUserId, dispatch } = useShoppingList()
+  const { lists, loading } = state
+  const navigate = useNavigate() // ← for navigation
   // ── Filtered lists (memoised) ───────────────────────────────────
+  console.log(state)
 
-  console.log("CurrentUserId in HomePage:", currentUserId, "state:", state);
   const filteredLists = useMemo(() => {
-    if (!currentUserId || !Array.isArray(lists)) return [];
+    if (!currentUserId || !Array.isArray(lists)) return []
 
     if (filter === "owned") {
-      return lists.filter((l) => l.ownerId === currentUserId);
+      return lists.filter((l) => l.ownerId === currentUserId)
     }
 
     if (filter === "shared") {
@@ -31,49 +32,44 @@ export default function HomePage() {
               (m) => m.userId === currentUserId && m.userId !== l.ownerId
             )
           : false
-      );
+      )
     }
 
-    return lists; // "all"
-  }, [lists, currentUserId, filter]);
+    return lists // "all"
+  }, [lists, currentUserId, filter])
 
-  console.log("HomePage render →", { filter, filteredLists });
   // ── Permission helper (owner / member) ───────────────────────────
   const getPermissions = useCallback(
     (list) => {
-      const isOwner = list.ownerId === currentUserId;
+      const isOwner = list.ownerId === currentUserId
       const isMember = Array.isArray(list.members)
         ? list.members.some((m) => m.userId === currentUserId)
-        : false;
+        : false
 
-      const isManager = isOwner || isMember;
+      const isManager = isOwner || isMember
 
       // Optional: pass full member object
-      const currentMember = list.members.find(
-        (m) => m.userId === currentUserId
-      );
-      return { isOwner, isMember, isManager, currentMember };
+      const currentMember = list.members.find((m) => m.userId === currentUserId)
+      return { isOwner, isMember, isManager, currentMember }
     },
     [currentUserId]
-  );
-
-  console.log("getPermissions in HomePage:", getPermissions);
+  )
 
   const handleCardClick = useCallback(
     (listId) => {
-      navigate(`/list/${listId}`);
+      navigate(`/list/${listId}`)
     },
     [navigate]
-  );
+  )
 
   // ── Reset handler ───────────────────────────────────────────────
   const resetListToDefault = useCallback(() => {
-    if (!window.confirm("Wanna reset data in homePage?")) return;
-    dispatch({ type: "RESET_HOMEPAGE" });
-  }, [dispatch]);
+    if (!window.confirm("Wanna reset data in homePage?")) return
+    dispatch({ type: actionTypes.resetHomePage })
+  }, [dispatch])
 
   // ── Render ───────────────────────────────────────────────────────
-  if (loading) return <p className="p-4 text-center">Loading…</p>;
+  if (loading) return <p className="p-4 text-center">Loading…</p>
   else {
     return (
       <div className="p-4">
@@ -119,7 +115,7 @@ export default function HomePage() {
                 onClick={() => setModalOpen(true)}
                 className="px-3 py-1 bg-green-600 text-white rounded"
               >
-                +++ New List
+                New List
               </button>
               <button
                 onClick={resetListToDefault}
@@ -143,7 +139,7 @@ export default function HomePage() {
             </p>
           ) : (
             filteredLists.map((list) => {
-              const { isOwner, isManager } = getPermissions(list);
+              const { isOwner, isManager } = getPermissions(list)
               return (
                 <ShoppingListCard
                   key={list.shopListId}
@@ -152,7 +148,7 @@ export default function HomePage() {
                   dispatch={dispatch}
                   onClick={() => handleCardClick(list.shopListId)}
                 />
-              );
+              )
             })
           )}
         </section>
@@ -163,6 +159,6 @@ export default function HomePage() {
           onClose={() => setModalOpen(false)}
         />
       </div>
-    );
+    )
   }
 }
