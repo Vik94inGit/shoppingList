@@ -53,81 +53,83 @@ export function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "100px auto", padding: "20px" }}>
-      <h2 style={{ margin: "15px 0, bold", display: "block" }}>
-        {t("pages.login.shoppingList")}
-      </h2>
+    <div className="w-full flex justify-center h-screen items-center">
+      <div className="flex flex-col">
+        <h2 style={{ margin: "15px 0, bold", display: "block" }}>
+          {t("pages.login.shoppingList")}
+        </h2>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: "15px" }}>
-          <label>Email:</label>
-          <input
-            type="email" // change to "text" if using username
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: "15px" }}>
+            <label>Email:</label>
+            <input
+              type="email" // change to "text" if using username
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginTop: "5px",
+                border: "1px solid #ddd",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#fff",
+                fontFamily: "Arial, sans-serif",
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: "15px" }}>
+            <label> {t("pages.login.password")}:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginTop: "5px",
+                border: "1px solid #ddd",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#fff",
+                fontFamily: "Arial, sans-serif",
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
             disabled={loading}
             style={{
-              width: "100%",
-              padding: "8px",
-              marginTop: "5px",
-              border: "1px solid #ddd",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "#fff",
-              fontFamily: "Arial, sans-serif",
+              rounded: "8px",
+              padding: "10px 20px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
-          />
-        </div>
+          >
+            {loading
+              ? `${t("pages.login.loginMes1")}`
+              : `${t("pages.login.loginMes2")}`}
+          </button>
+        </form>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label> {t("pages.login.password")}:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "8px",
-              marginTop: "5px",
-              border: "1px solid #ddd",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "#fff",
-              fontFamily: "Arial, sans-serif",
-            }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            rounded: "8px",
-            padding: "10px 20px",
-            background: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
-          {loading
-            ? `${t("pages.login.loginMes1")}`
-            : `${t("pages.login.loginMes2")}`}
-        </button>
-      </form>
-
-      <p style={{ marginTop: "20px" }}>
-        {t("pages.login.registerMessage1")}{" "}
-        <a href="/register" style={{ color: "#007bff" }}>
-          {t("pages.login.registerMessage2")}
-        </a>
-        .
-      </p>
+        <p style={{ marginTop: "20px" }}>
+          {t("pages.login.registerMessage1")}{" "}
+          <a href="/register" style={{ color: "#007bff" }}>
+            {t("pages.login.registerMessage2")}
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 }

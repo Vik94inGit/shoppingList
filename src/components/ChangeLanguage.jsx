@@ -16,12 +16,12 @@ export const ChangeLanguage = () => {
     <>
       <button
         onClick={() => setIsMenuOpen((p) => !p)}
-        className="fixed top-5 right-5"
+        className="fixed top-5 right-14"
       >
         {language}
       </button>
       {isMenuOpen && (
-        <div className="fixed right-4 top-12 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
+        <div className="fixed right-12 top-12 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
           <>
             <button
               className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"

@@ -96,7 +96,7 @@ export default function HomePage() {
       <div className="p-4 max-w-5xl mx-auto margin-top-8-left-30">
         {/* ── Header + Pop-over filters ── */}
         <header className="flex justify-between items-center mb-6 relative">
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold text-gray-900">
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold text-gray-900 dark:text-white">
             Shopping Lists
           </h1>
           <div className="w-9"></div>
