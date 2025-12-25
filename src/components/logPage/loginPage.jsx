@@ -1,6 +1,7 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 export function LoginPage() {
@@ -9,6 +10,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useShoppingList();
+  const { t } = useTranslation();
 
   const navigate = useNavigate();
 
@@ -53,7 +55,7 @@ export function LoginPage() {
   return (
     <div style={{ maxWidth: "400px", margin: "100px auto", padding: "20px" }}>
       <h2 style={{ margin: "15px 0, bold", display: "block" }}>
-        Shopping List
+        {t("pages.login.shoppingList")}
       </h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -81,7 +83,7 @@ export function LoginPage() {
         </div>
 
         <div style={{ marginBottom: "15px" }}>
-          <label>Password:</label>
+          <label> {t("pages.login.password")}:</label>
           <input
             type="password"
             value={password}
@@ -113,14 +115,16 @@ export function LoginPage() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading
+            ? `${t("pages.login.loginMes1")}`
+            : `${t("pages.login.loginMes2")}`}
         </button>
       </form>
 
       <p style={{ marginTop: "20px" }}>
-        Don't have an account?{" "}
+        {t("pages.login.registerMessage1")}{" "}
         <a href="/register" style={{ color: "#007bff" }}>
-          Register here
+          {t("pages.login.registerMessage2")}
         </a>
         .
       </p>

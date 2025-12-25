@@ -8,7 +8,7 @@ import { ShoppingList } from "./components/shoppingList/ShoppingList.jsx";
 import HomePage from "./components/homePage/HomePage.jsx";
 import { LoginPage } from "./components/logPage/loginPage.jsx";
 import { RegisterPage } from "./components/logPage/registerPage.jsx";
-
+import "./i18n.js";
 import { ShoppingListProvider } from "./context/ShoppingListContext.jsx";
 
 // Helper component to protect routes
