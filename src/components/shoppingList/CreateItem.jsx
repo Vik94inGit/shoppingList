@@ -16,6 +16,7 @@ export function CreateItem({ shopListId }) {
       await actions.addItem(shopListId, {
         itemName: newName.trim(),
         count: newCount ? Number(newCount) : 1,
+        isResolved: false,
       });
 
       setNewName("");

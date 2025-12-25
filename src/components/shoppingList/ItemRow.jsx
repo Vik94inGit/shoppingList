@@ -37,7 +37,15 @@ export default function ItemRow({ item }) {
   if (!item || !item.itemId) return null;
   const { itemId, itemName, count, isResolved } = item;
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
+    console.log(itemId);
+    const trimmedName = editName.trim();
+    const itemData = {
+      itemName: trimmedName,
+      count: Number(editCount) || 1,
+      isResolved: true,
+    };
+    await updateItem(shopListId, itemId, itemData);
     dispatch({
       type: actionTypes.toggleItemResolved,
       payload: { shopListId, itemId },

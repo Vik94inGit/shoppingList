@@ -154,6 +154,7 @@ export function ShoppingListProvider({ children }) {
       const newItemFromServer = await addItemToList(shopListId, {
         itemName: itemData.itemName,
         count: itemData.count ? Number(itemData.count) : 1,
+        isResolved: false,
       });
 
       // The backend should return the created item with its server-generated ID
