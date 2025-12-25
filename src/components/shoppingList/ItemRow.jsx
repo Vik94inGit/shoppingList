@@ -43,7 +43,7 @@ export default function ItemRow({ item }) {
     const itemData = {
       itemName: trimmedName,
       count: Number(editCount) || 1,
-      isResolved: true,
+      isResolved: !isResolved,
     };
     await updateItem(shopListId, itemId, itemData);
     dispatch({
