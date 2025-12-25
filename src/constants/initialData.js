@@ -1,4 +1,4 @@
-export const CURRENT_USER_ID = "user-member-456" // Simulace aktuálně přihlášeného uživatele
+export const CURRENT_USER_ID = "user-member-456"; // Simulace aktuálně přihlášeného uživatele
 
 export let SHOPPING_LIST_DATA = [
   {
@@ -78,10 +78,10 @@ export let SHOPPING_LIST_DATA = [
       { itemId: "item-6", itemName: "Máslo", count: 1, isResolved: false },
     ],
   },
-]
+];
 
 export const initialState = {
   lists: [], // ← bude naplněno z localStorage nebo mocku
   loading: true, // ← čekáme na data
   currentUserId: CURRENT_USER_ID,
-}
+};

@@ -1,79 +1,108 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
-import PropTypes from "prop-types"
-import { useShoppingList } from "../../context/ShoppingListContext"
-import { useParams } from "react-router-dom"
-import { actionTypes } from "../../context/ReducerHelper"
-
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import PropTypes from "prop-types";
+import { useShoppingList } from "../../context/ShoppingListContext";
+import { useParams } from "react-router-dom";
+import { actionTypes } from "../../context/ReducerHelper";
+import { deleteItem, updateItem } from "../shoppingList/useShoppingList";
 export default function ItemRow({ item }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState(item.itemName)
-  const [editCount, setEditCount] = useState(item.count)
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.itemName);
+  const [editCount, setEditCount] = useState(item.count);
 
-  const { state, currentUserId, dispatch } = useShoppingList()
-  const { lists } = state
-  const { listId } = useParams() // ← from URL: /list/sl-3
-  const list = lists.find((l) => l.shopListId === listId || l.id === listId)
+  const { lists, currentUserId, dispatch } = useShoppingList();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef(null)
+  const { shopListId } = useParams(); // ← from URL: /list/sl-3
+  const list = lists.find(
+    (l) => l.shopListId === shopListId || l.id === shopListId
+  );
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   // ← Wrap in useCallback to stabilize reference
   const handleClickOutside = useCallback((event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setIsMenuOpen(false)
+      setIsMenuOpen(false);
     }
-  }, []) // ← No dependencies! setIsMenuOpen is stable
+  }, []); // ← No dependencies! setIsMenuOpen is stable
 
-  const isMember = list.members.some((m) => m.userId === currentUserId)
+  const isMember = list.members.some((m) => m.userId === currentUserId);
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [handleClickOutside]) // ← Only re-subscribe if handler changes
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleClickOutside]); // ← Only re-subscribe if handler changes
 
-  if (!item || !item.itemId) return null
-  const { itemId, itemName, count, isResolved } = item
+  if (!item || !item.itemId) return null;
+  const { itemId, itemName, count, isResolved } = item;
 
   const handleToggle = () => {
     dispatch({
       type: actionTypes.toggleItemResolved,
-      payload: { listId, itemId },
-    })
-  }
+      payload: { shopListId, itemId },
+    });
+  };
 
-  const handleSave = () => {
-    const trimmedName = editName.trim()
-    if (!trimmedName) return
-    dispatch({
-      type: actionTypes.updateItem,
-      payload: {
-        itemId,
+  const handleSave = async () => {
+    const trimmedName = editName.trim();
+    if (!trimmedName) return;
+
+    try {
+      const shopListId = list.shopListId;
+      const itemData = {
         itemName: trimmedName,
-        count: editCount,
-        listId,
-      },
-    })
-    setIsEditing(false)
-    setIsMenuOpen(false)
-  }
+        count: Number(editCount) || 1,
+      };
+      // 1. Call the Database first
+      await updateItem(shopListId, itemId, itemData);
+      dispatch({
+        type: actionTypes.updateItem,
+        payload: {
+          itemId,
+          itemName: trimmedName,
+          count: Number(editCount) || 1,
+          shopListId,
+        },
+      });
+      setIsEditing(false);
+      setIsMenuOpen(false);
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Nepodařilo se aktualizovat položku.");
+    }
+  };
 
   const handleCancel = () => {
-    setEditName(itemName)
-    setEditCount(count)
-    setIsEditing(false)
-    setIsMenuOpen(false)
-  }
+    setEditName(itemName);
+    setEditCount(count);
+    setIsEditing(false);
+    setIsMenuOpen(false);
+  };
 
-  const handleRemove = () => {
-    if (!window.confirm(`Opravdu smazat "${itemName}"?`)) return
-    dispatch({ type: actionTypes.removeItem, payload: { itemId, listId } })
-    setIsMenuOpen(false)
-  }
+  const handleRemove = async () => {
+    if (!window.confirm(`Opravdu smazat "${itemName}"?`)) return;
+
+    try {
+      // 1. Call the Database first
+      await deleteItem(shopListId, itemId);
+
+      // 2. If successful, update the UI state
+      dispatch({
+        type: actionTypes.removeItem,
+        payload: { itemId, shopListId },
+      });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Nepodařilo se smazat položku.");
+    } finally {
+      setIsMenuOpen(false);
+    }
+  };
 
   // Loading / Not found
   if (!list) {
-    return <p className="p-4 text-red-600">Seznam nenalezen.</p>
+    return <p className="p-4 text-red-600">Seznam nenalezen.</p>;
   }
 
   if (isMember) {
@@ -174,7 +203,7 @@ export default function ItemRow({ item }) {
           )}
         </div>
       </li>
-    )
+    );
   }
 }
 
@@ -185,4 +214,4 @@ ItemRow.propTypes = {
     count: PropTypes.number.isRequired,
     isResolved: PropTypes.bool.isRequired,
   }).isRequired,
-}
+};

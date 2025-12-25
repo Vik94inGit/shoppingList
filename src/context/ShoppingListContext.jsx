@@ -1,92 +1,223 @@
+// src/context/ShoppingListContext.jsx
+
 import {
   createContext,
   useContext,
   useReducer,
   useEffect,
+  useMemo,
   useState,
-} from "react"
+} from "react";
+import { ShoppingListReducer } from "./ShoppingListReducer.jsx";
+import { actionTypes } from "./ReducerHelper";
+
 import {
-  CURRENT_USER_ID,
-  SHOPPING_LIST_DATA,
-  initialState,
-} from "../constants/initialData.js"
-import { ShoppingListReducer } from "./ShoppingListReducer.jsx"
-import { actionTypes, getListAuth } from "./ReducerHelper"
-const ShoppingListContext = createContext()
+  fetchAllLists,
+  createList,
+  deleteList,
+  updateList,
+} from "../components/homePage/useHomePage.js";
+import {
+  addItemToList,
+  addMemberToList,
+  deleteMember,
+} from "../components/shoppingList/useShoppingList.js";
+
+const ShoppingListContext = createContext();
+
+const initialState = {
+  lists: [],
+  loading: true,
+  error: null,
+};
 
 export function ShoppingListProvider({ children }) {
-  const [state, dispatch] = useReducer(ShoppingListReducer, initialState)
-  const [currentUserId, setCurrentUserId] = useState(CURRENT_USER_ID)
+  const [state, dispatch] = useReducer(ShoppingListReducer, initialState);
 
-  // Save to localStorage on every change
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const saved = localStorage.getItem("shoppingLists")
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed)) {
-            dispatch({ type: actionTypes.loadLists, payload: parsed })
-          }
-        } else {
-          // No saved data → use mock data
-          dispatch({ type: actionTypes.loadLists, payload: SHOPPING_LIST_DATA })
-        }
-      } catch (err) {
-        console.warn("[Context] Load failed", err)
-        // Fallback to mock data
-        dispatch({ type: actionTypes.loadLists, payload: SHOPPING_LIST_DATA })
-      } finally {
-        dispatch({ type: actionTypes.setLoading, payload: false }) // ← CRITICAL
-      }
+  const { lists, loading, error } = state;
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Decode user from JWT token (or get from sessionStorage if you saved it)
+  // In ShoppingListProvider
+
+  const loadUserData = async () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      dispatch({ type: actionTypes.setLoading, payload: true });
+
+      // Decode user (as you did before)
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setCurrentUser({
+        id: payload.id,
+        userName: payload.userName,
+        email: payload.email,
+      });
+
+      const lists = await fetchAllLists();
+      dispatch({ type: actionTypes.loadLists, payload: lists });
+    } catch (err) {
+      console.error("Fetch failed", err);
+    } finally {
+      dispatch({ type: actionTypes.setLoading, payload: false });
     }
-    load()
-  }, [dispatch])
+  };
 
+  // 2. Initial load (for page refresh)
   useEffect(() => {
-    if (!state.loading) {
-      localStorage.setItem("shoppingLists", JSON.stringify(state.lists))
+    loadUserData();
+  }, []);
+  const logout = () => {
+    sessionStorage.removeItem("token");
+    setCurrentUser(null);
+    dispatch({ type: actionTypes.loadLists, payload: [] });
+    dispatch({ type: actionTypes.setLoading, payload: false });
+  };
+
+  const login = async (token) => {
+    sessionStorage.setItem("token", token);
+    // CRITICAL: Call the load function immediately after setting the token
+    await loadUserData();
+  };
+
+  // === Async action helpers (thunks) ===
+  const createNewList = async (listData) => {
+    console.log("Creating new list with data:", listData);
+    try {
+      const newList = await createList(listData);
+      // Assuming API returns { success: true, data: { ...list } }
+      const listToAdd = newList.data || newList;
+      dispatch({ type: actionTypes.addList, payload: listToAdd });
+    } catch (err) {
+      console.error("Create list failed:", err);
+      throw err; // let component handle error
     }
-  }, [state.lists, state.loading])
+  };
 
-  // === 3. Helper to get auth for any list ===
-  const getListAuthFor = (listId) =>
-    getListAuth(state.lists, listId, currentUserId)
+  const updateById = async (shopListId, updateData) => {
+    try {
+      const updatedList = await updateList(shopListId, updateData);
+      dispatch({ type: actionTypes.renameList, payload: updatedList });
+    } catch (err) {
+      console.error("Update failed:", err);
+      throw err;
+    }
+  };
 
-  // === 4. Login / Switch User (for demo) ===
-  const loginAs = (userId) => {
-    setCurrentUserId(userId)
-    localStorage.setItem("currentUserId", userId)
-  }
+  const deleteListById = async (shopListId) => {
+    try {
+      await deleteList(shopListId);
+      dispatch({ type: actionTypes.deleteList, payload: { shopListId } });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      throw err;
+    }
+  };
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("currentUserId")
-    if (savedUser) setCurrentUserId(savedUser)
-  }, [])
-  1
-  const value = {
-    state: {
-      lists: state.lists,
-      loading: state.loading,
-    },
-    currentUserId,
-    dispatch,
-    getListAuth: getListAuthFor,
-    loginAs,
-  }
+  // You can add more: updateListName, addItem, etc. with API calls + dispatch
+  console.log("DEBUG: Context State Update", {
+    currentUser: currentUser?.userName,
+    listsCount: lists?.length,
+    loadingState: loading,
+  });
+
+  const inviteMemberToList = async (shopListId, userData) => {
+    try {
+      console.log("Inviting member", userData, "to list", shopListId);
+      await addMemberToList(shopListId, userData);
+      // Update the local state so the UI refreshes immediately
+      dispatch({ type: actionTypes.addMember, payload: userData });
+    } catch (err) {
+      console.error("Failed to add member", err);
+    }
+  };
+
+  // Example: Remove a member
+  const removeMember = async (shopListId, memberId) => {
+    try {
+      await deleteMember(shopListId, memberId);
+      dispatch({
+        type: actionTypes.removeMember,
+        payload: { shopListId, memberId },
+      });
+    } catch (err) {
+      console.error("Failed to remove member", err);
+    }
+  };
+
+  const addItem = async (shopListId, itemData) => {
+    try {
+      // Optimistic update: add temporarily to UI (optional, see note below)
+      // But safer: wait for server response
+
+      const newItemFromServer = await addItemToList(shopListId, {
+        itemName: itemData.itemName,
+        count: itemData.count ? Number(itemData.count) : 1,
+      });
+
+      // The backend should return the created item with its server-generated ID
+      // e.g. { itemId: "123", itemName: "Milk", count: 2, ... }
+
+      dispatch({
+        type: actionTypes.addItem,
+        payload: {
+          shopListId,
+          ...newItemFromServer, // spread the full item (includes itemId)
+          itemId: newItemFromServer.itemId || newItemFromServer._id,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to add item:", err);
+      // Optionally dispatch an error action or show toast
+      throw err;
+    }
+  };
+
+  const value = useMemo(
+    () => ({
+      lists,
+      loading,
+      error,
+      currentUser,
+      login,
+      logout,
+      dispatch,
+      actions: {
+        createNewList,
+        deleteListById,
+        updateById,
+        addItem,
+        inviteMemberToList,
+        removeMember,
+      },
+    }),
+    [
+      lists,
+      loading,
+      error,
+      currentUser,
+      createNewList,
+      deleteListById,
+      updateById,
+      inviteMemberToList,
+      addItem,
+      removeMember,
+      addMemberToList,
+    ]
+  );
 
   return (
     <ShoppingListContext.Provider value={value}>
       {children}
     </ShoppingListContext.Provider>
-  )
+  );
 }
 
-// Export the hook
 export const useShoppingList = () => {
-  const context = useContext(ShoppingListContext)
+  const context = useContext(ShoppingListContext);
   if (!context) {
-    throw new Error("useShoppingList must be used within ShoppingListProvider")
+    throw new Error("useShoppingList must be used within ShoppingListProvider");
   }
-  return context
-}
+  return context;
+};

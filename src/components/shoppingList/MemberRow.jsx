@@ -1,9 +1,9 @@
 // src/components/shoppingList/MemberRow.jsx
-import React from "react"
-import PropTypes from "prop-types"
-import { actionTypes } from "../../context/ReducerHelper"
-import { useParams } from "react-router-dom"
-
+import React from "react";
+import PropTypes from "prop-types";
+import { actionTypes } from "../../context/ReducerHelper";
+import { useParams } from "react-router-dom";
+import { useShoppingList } from "../../context/ShoppingListContext";
 /**
  * MEMBERROW – SINGLE MEMBER WITH REMOVE/LEAVE ACTION
  *
@@ -18,75 +18,89 @@ import { useParams } from "react-router-dom"
  * LOGS → [MemberRow]
  */
 export default function MemberRow({
+  currentUserId,
   member,
   ownerId,
-  currentUserId,
   dispatch,
 }) {
-  const { listId } = useParams()
+  const { shopListId } = useParams();
+  const { actions } = useShoppingList();
+  const { removeMember } = actions;
+  console.log(
+    "[MemberRow] Rendering member:",
+    member,
+    "of list:",
+    shopListId,
+    "for currentUserId:",
+    currentUserId,
+    typeof member.memberId
+  );
   //
   // 1. DEFENSIVE CHECK
   // -------------------------------------------------
-  if (!member || !member.userId) {
-    console.warn("[MemberRow] Invalid member prop:", member)
-    return null
+  if (!member || !member.memberId) {
+    console.warn("[MemberRow] Invalid member prop:", member);
+    return null;
   }
 
-  const { userId: memberId, userName, email } = member
+  const { memberId, userName, email } = member;
 
   // -------------------------------------------------
   // 2. AUTH FLAGS
   // -------------------------------------------------
 
-  const isOwner = ownerId === memberId
-  const isCurrentUser = currentUserId === memberId
-  const isListOwner = currentUserId === ownerId
+  const isOwner = ownerId === memberId;
+  const isCurrentUser = currentUserId === memberId;
+  const isListOwner = currentUserId === ownerId;
 
   // -------------------------------------------------
   // 3. ACTION HANDLERS
   // -------------------------------------------------
-  const handleRemoveOther = () => {
+  const handleRemoveOther = async () => {
     if (isOwner) {
-      alert("Nelze odstranit vlastníka seznamu.")
-      return
+      alert("Nelze odstranit vlastníka seznamu.");
+      return;
     }
 
     if (!isListOwner) {
-      alert("Nemáte oprávnění odstraňovat členy.")
-      return
+      alert("Nemáte oprávnění odstraňovat členy.");
+      return;
     }
     const confirmed = window.confirm(
       `You really want to remove **${userName}** (${email})?`
-    )
+    );
     if (confirmed) {
+      console.log("[MemberRow] Removing memberId:", memberId);
+      await removeMember(shopListId, memberId);
       dispatch({
         type: actionTypes.removeMember,
-        payload: { memberId, userId: currentUserId, listId },
-      })
+        payload: { shopListId, memberId },
+      });
     }
-  }
+  };
 
-  const handleLeaveList = () => {
+  const handleLeaveList = async () => {
     if (!isOwner && isCurrentUser) {
-      if (!window.confirm(`Opravdu chcete opustit seznam?`)) return
-
+      console.log("[MemberRow] Leaving list for userId:", currentUserId);
+      if (!window.confirm(`Opravdu chcete opustit seznam?`)) return;
+      await deleteMember(shopListId, memberId);
       dispatch({
         type: actionTypes.leaveList,
-        payload: { userId: currentUserId, listId },
-      })
+        payload: { shopListId, userId: currentUserId },
+      });
     }
-  }
+  };
 
   // -------------------------------------------------
   // 4. ROLE BADGE
   // -------------------------------------------------
   const getRoleBadge = () => {
-    if (isOwner) return { text: "Owner", color: "#d4af37", icon: "Owner" }
-    if (isCurrentUser) return { text: "You", color: "#007bff", icon: "You" }
-    return { text: "Member", color: "#6c757d", icon: "" }
-  }
+    if (isOwner) return { text: "Owner", color: "#d4af37", icon: "Owner" };
+    if (isCurrentUser) return { text: "You", color: "#007bff", icon: "You" };
+    return { text: "Member", color: "#6c757d", icon: "" };
+  };
 
-  const role = getRoleBadge()
+  const role = getRoleBadge();
 
   // -------------------------------------------------
   // 5. RENDER
@@ -173,19 +187,20 @@ export default function MemberRow({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // -------------------------------------------------
 // PropTypes
 // -------------------------------------------------
 MemberRow.propTypes = {
+  currentUserId: PropTypes.string.isRequired,
   member: PropTypes.shape({
-    userId: PropTypes.string.isRequired,
+    memberId: PropTypes.string.isRequired,
     userName: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
   }).isRequired,
   ownerId: PropTypes.string.isRequired,
-  currentUserId: PropTypes.string.isRequired,
+
   dispatch: PropTypes.func.isRequired,
-}
+};

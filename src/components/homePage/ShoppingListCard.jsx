@@ -1,32 +1,41 @@
 // src/components/ShoppingListCard.jsx
-import { EditName } from "../shoppingList/EditName"
-import { DeleteListButton } from "../shoppingList/DeleteListButton"
-export default function ShoppingListCard({ list, isOwner, dispatch, onClick }) {
-  const { shopListId, name, ownerId = [] } = list
+import { EditName } from "./EditName";
+import { DeleteListButton } from "../shoppingList/DeleteListButton";
 
+export default function ShoppingListCard({ list, isOwner, dispatch, onClick }) {
+  const { shopListId, name, items } = list;
+
+  // ← Remove ALL these broken lines:
+  // const { shopListId, name, ownerId = [] } = list;
+  // const { currentUser } = useShoppingList();
+  // const currentUserId = currentUser?.id;
+  // isOwner = ownerId === userId;  ← HUGE BUG!
+  console.log(items.length, "items.length in ShoppingListCard");
   return (
     <div
       onClick={onClick}
-      className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
     >
-      {/* List Name */}
-      <EditName name={name} shopListId={shopListId} dispatch={dispatch} />
+      {/* Shopping list name (main title) */}
 
-      {/* Action Buttons */}
+      {/* Item count under the name */}
+      <p className="text-gray-600 mb-4">
+        {items.length} {items.length === 1 ? "item" : "items"}
+      </p>
+      <EditName
+        name={name}
+        shopListId={shopListId}
+        dispatch={dispatch}
+        isOwner={isOwner} // ← use the correct prop from HomePage!
+      />
       {isOwner && (
-        <div className="flex gap-2 mt-4">
+        <div className="mt-4 flex justify-end">
           <DeleteListButton
-            userId={list.currentUserId}
-            ownerId={ownerId}
+            shopListId={shopListId} // ← pass the ID
             dispatch={dispatch}
           />
         </div>
       )}
-
-      {/* Optional: Link to list details */}
-      {/* <Link to={`/list/${id}`} className="block mt-3 text-blue-600 text-sm">
-        Open list →
-      </Link> */}
     </div>
-  )
+  );
 }

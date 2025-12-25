@@ -1,7 +1,11 @@
 // src/components/shoppingList/Invite.jsx
-import React, { useState, useEffect } from "react"
-import PropTypes from "prop-types"
-import { actionTypes } from "../../context/ReducerHelper"
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { actionTypes } from "../../context/ReducerHelper";
+
+import { useShoppingList } from "../../context/ShoppingListContext.jsx";
+import { useParams } from "react-router-dom";
+import { addMemberToList } from "../shoppingList/useShoppingList.js";
 
 /**
  * INVITE COMPONENT – OWNER-ONLY INVITATION FORM
@@ -15,55 +19,84 @@ import { actionTypes } from "../../context/ReducerHelper"
  *
  * LOGS: prefixed with `[Invite]` → filter in Console!
  */
-export default function Invite({ userId, dispatch, isOwner }) {
+export default function Invite({ dispatch, isOwner }) {
   // LOCAL STATE
-  const [email, setEmail] = useState("")
-  const [userName, setUserName] = useState("")
+  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
+  const { actions } = useShoppingList();
+  const inviteMemberToList = actions.inviteMemberToList;
+  const { shopListId } = useParams();
+  const [status, setStatus] = useState({ type: null, text: "" });
 
   // OWNER CHECK
   if (!isOwner) {
-    return null
+    return null;
   }
 
   // HANDLE INPUT CHANGES
   const handleEmailChange = (e) => {
-    const value = e.target.value
-    setEmail(value)
-  }
+    const value = e.target.value;
+    setEmail(value);
+  };
 
   const handleNameChange = (e) => {
-    const value = e.target.value
-    setUserName(value)
-  }
+    const value = e.target.value;
+    setUserName(value);
+  };
 
   // HANDLE SUBMIT
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // TRIM & VALIDATE
-    const trimmedEmail = email.trim()
-    const trimmedName = userName.trim()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedName = userName.trim();
 
-    if (!trimmedEmail || !trimmedName) {
-      return
+    if (!trimmedEmail) {
+      setStatus({ type: "error", text: "Zadejte prosím email" });
+      return;
     }
 
-    // PAYLOAD
-    const payload = {
+    const userData = {
       email: trimmedEmail,
-      userName: trimmedName,
-      userId: userId,
+      userName: trimmedName || undefined,
+    };
+
+    try {
+      const newMemberFromBackend = await addMemberToList(shopListId, userData);
+      console.log("[Invite] Member added:", newMemberFromBackend);
+
+      dispatch({
+        type: actionTypes.addMember,
+        payload: {
+          shopListId,
+          memberId: newMemberFromBackend.memberId || newMemberFromBackend.id, // Ensure this field matches your API
+          userName: newMemberFromBackend.userName || trimmedName,
+          email: newMemberFromBackend.email || trimmedEmail,
+        },
+      });
+
+      // Show success message
+      setStatus({
+        type: "success",
+        text: `${newMemberFromBackend.userName || trimmedEmail} byl přidán!`,
+      });
+
+      // Clear form
+      setEmail("");
+      setUserName("");
+    } catch (error) {
+      console.error("Failed to add member:", error);
+
+      // Determine error message
+      let errorMsg = "Nepodařilo se přidat člena";
+      if (error.message?.includes("already a member")) {
+        errorMsg = "Uživatel je již v seznamu";
+      } else if (error.message?.includes("not registered")) {
+        errorMsg = "Uživatel není registrovaný – nelze přidat";
+      }
+
+      setStatus({ type: "error", text: errorMsg });
     }
-
-    // DISPATCH → Reducer handles invitation
-    dispatch({
-      type: actionTypes.addMember,
-      payload,
-    })
-
-    // RESET FORM
-    setEmail("")
-    setUserName("")
-  }
+  };
 
   return (
     <div
@@ -152,7 +185,7 @@ export default function Invite({ userId, dispatch, isOwner }) {
 
       {/* DEBUG NOTE */}
     </div>
-  )
+  );
 }
 
 // PropTypes – runtime validation
@@ -160,4 +193,4 @@ Invite.propTypes = {
   userId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
   isOwner: PropTypes.bool.isRequired,
-}
+};

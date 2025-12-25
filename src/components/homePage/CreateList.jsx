@@ -1,65 +1,54 @@
 // src/components/shoppingList/CreateListModal.jsx
-import { useState, useCallback } from "react"
-import { useShoppingList } from "../../context/ShoppingListContext"
-import { MemberList, MembersListContent } from "../shoppingList/MemberList"
-import ItemList from "../shoppingList/ItemList" // ← your ItemsList (renamed)
-import { actionTypes } from "../../context/ReducerHelper"
+import { useState, useCallback } from "react";
+
+import { MemberList, MembersListContent } from "../shoppingList/MemberList";
+import ItemList from "../shoppingList/ItemList"; // ← your ItemsList (renamed)
+import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 
 export default function CreateListModal({ isOpen, onClose }) {
-  const { currentUserId, dispatch } = useShoppingList()
-
+  const { currentUser, actions, dispatch } = useShoppingList();
+  // Define currentUserId from the currentUser object safely
+  const currentUserId = currentUser?.id;
   // ── Form state ─────────────────────────────────────────────────────
-  const [name, setName] = useState("")
-  const [items, setItems] = useState([])
-  const [members, setMembers] = useState([
-    {
-      userId: currentUserId,
-      userName: "Já (Vlastník)",
-      email: "",
-      role: "owner",
-    },
-  ])
+  const [name, setName] = useState("");
+  const [items, setItems] = useState([]);
+  const [members, setMembers] = useState([]);
 
   // ── Dropdown state ─────────────────────────────────────────────────
-  const [membersOpen, setMembersOpen] = useState(true)
-  const [itemsOpen, setItemsOpen] = useState(true)
+  const [membersOpen, setMembersOpen] = useState(true);
+  const [itemsOpen, setItemsOpen] = useState(true);
+
+  const handleClose = useCallback(() => {
+    setName("");
+    setItems([]);
+    setMembers([]);
+    setMembersOpen(true);
+    setItemsOpen(true);
+    onClose();
+  }, [currentUserId, onClose]);
 
   // ── Handlers ───────────────────────────────────────────────────────
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (!name.trim()) {
-      alert("Zadejte název seznamu")
-      return
+      alert("Zadejte název seznamu");
+      return;
     }
 
     const newList = {
       name: name.trim(),
-      ownerId: currentUserId,
       members,
       items: items.map((i) => ({ ...i, isArchieved: false })),
+    };
+    try {
+      console.log("Creating new list on frontend:", newList);
+      await actions.createNewList(newList);
+      handleClose(); // Reset state and close modal
+    } catch (err) {
+      alert("Nepodařilo se uložit seznam na server.");
     }
-
-    dispatch({ type: actionTypes.addList, payload: newList })
-    onClose()
-  }, [name, currentUserId, members, items, dispatch, onClose])
-
-  const handleClose = useCallback(() => {
-    setName("")
-    setItems([])
-    setMembers([
-      {
-        userId: currentUserId,
-        userName: "Já (Vlastník)",
-        email: "",
-        role: "owner",
-      },
-    ])
-    setMembersOpen(true)
-    setItemsOpen(true)
-    onClose()
-  }, [currentUserId, onClose])
-
-  if (!isOpen) return null
+  }, [name, currentUser, members, items, actions, handleClose]);
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -140,5 +129,5 @@ export default function CreateListModal({ isOpen, onClose }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

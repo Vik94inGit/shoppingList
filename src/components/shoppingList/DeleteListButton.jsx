@@ -1,41 +1,42 @@
 // src/components/shoppingList/DeleteListButton.jsx
-import React from "react"
-import PropTypes from "prop-types"
-import { useNavigate, useParams } from "react-router-dom"
-import { actionTypes } from "../../context/ReducerHelper"
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 
-export function DeleteListButton({ userId, ownerId, dispatch }) {
-  // UI authorisation: Show button only to the owner
-  const isOwner = ownerId === userId
-  const { listId } = useParams()
-  const navigate = useNavigate()
-  if (!isOwner) return null
+export function DeleteListButton({ shopListId, dispatch }) {
+  const { actions } = useShoppingList();
+  const navigate = useNavigate();
 
-  const handleDelete = () => {
+  if (!shopListId) {
+    console.error("DeleteListButton: missing shopListId");
+    return null;
+  }
+
+  const handleDelete = async (e) => {
+    e.stopPropagation(); // ← prevent card navigation
+
     const confirmed = window.confirm(
       "Opravdu chcete smazat nákupní seznam? Tato akce je nevratná."
-    )
+    );
 
     if (confirmed) {
-      dispatch({ type: actionTypes.deleteList, payload: { listId } })
-      navigate("/")
+      try {
+        await actions.deleteListById(shopListId);
+        navigate("/");
+      } catch (err) {
+        alert("Smazání selhalo. Zkuste znovu.");
+      }
     }
-  }
+  };
 
   return (
     <button
       type="button"
       onClick={handleDelete}
-      aria-label="Smazat celý nákupní seznam"
+      className="text-red-600 hover:text-red-800 text-2xl"
+      aria-label="Smazat seznam"
     >
       🗑️
     </button>
-  )
-}
-
-// PropTypes validation (only in development)
-DeleteListButton.propTypes = {
-  userId: PropTypes.string.isRequired,
-  ownerId: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
+  );
 }

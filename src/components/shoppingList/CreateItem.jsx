@@ -1,25 +1,32 @@
 // src/components/shoppingList/CreateItemForm.jsx
-import { useState } from "react"
-import PropTypes from "prop-types"
-import { actionTypes } from "../../context/ReducerHelper"
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { actionTypes } from "../../context/ReducerHelper";
+import { useShoppingList } from "../../context/ShoppingListContext";
 
-export default function CreateItem({ userId, dispatch, shopListId }) {
-  const [newName, setNewName] = useState("")
-  const [newCount, setNewCount] = useState("")
-  const handleAdd = () => {
-    dispatch({
-      type: actionTypes.addItem,
-      payload: {
-        shopListId,
-        itemId: `${shopListId}-item-${Date.now()}`,
-        itemName: newName,
-        count: newCount,
-        userId,
-      },
-    })
-    setNewName("")
-    setNewCount("")
-  }
+export function CreateItem({ shopListId }) {
+  const { actions } = useShoppingList();
+  const [newName, setNewName] = useState("");
+  const [newCount, setNewCount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const handleAdd = async () => {
+    if (!newName.trim()) return;
+    setIsLoading(true);
+    try {
+      await actions.addItem(shopListId, {
+        itemName: newName.trim(),
+        count: newCount ? Number(newCount) : 1,
+      });
+
+      setNewName("");
+      setNewCount("");
+    } catch (err) {
+      // Handle error (e.g. show toast)
+      alert("Failed to add item. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex gap-2 mt-6">
@@ -45,10 +52,10 @@ export default function CreateItem({ userId, dispatch, shopListId }) {
         Add
       </button>
     </div>
-  )
+  );
 }
 
 CreateItem.propTypes = {
   userId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
-}
+};

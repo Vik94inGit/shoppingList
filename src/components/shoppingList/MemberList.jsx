@@ -1,8 +1,8 @@
 // src/components/shoppingList/MemberList.jsx
-import React from "react"
-import PropTypes from "prop-types"
-import MemberRow from "./MemberRow.jsx" // Fixed: correct component name
-import Invite from "./Invite.jsx"
+import React from "react";
+import PropTypes from "prop-types";
+import MemberRow from "./MemberRow.jsx"; // Fixed: correct component name
+import Invite from "./Invite.jsx";
 
 /**
  * MEMBERLIST – DISPLAYS ALL LIST MEMBERS + INVITE FORM
@@ -19,15 +19,28 @@ import Invite from "./Invite.jsx"
  * LOGS: `[MemberList]` prefix
  */
 export const MemberList = ({ members, ownerId, currentUserId, dispatch }) => {
-  const isOwner = ownerId === currentUserId
-
+  const isOwner = ownerId === currentUserId;
+  console.log(
+    "[MemberList] Rendering for currentUserId:",
+    currentUserId,
+    "ownerId:",
+    ownerId,
+    "isOwner:",
+    isOwner,
+    "members:",
+    members
+  );
   return (
     <div className="mt-5 p-4 border border-gray-300 rounded-[8px] bg-gray-100">
       {/* HEADER */}
       <h3 className="mb-4 pb-2 border-b-2 border-blue-600 text-blue-800 font-semibold">
         👥 Members ({members.length})
       </h3>
-
+      {/* INVITE FORM – OWNER ONLY */}
+      <Invite
+        dispatch={dispatch} // ← Invite handles ADD_MEMBER
+        isOwner={isOwner}
+      />
       {/* MEMBERS LIST */}
       <MembersListContent
         members={members}
@@ -35,20 +48,14 @@ export const MemberList = ({ members, ownerId, currentUserId, dispatch }) => {
         dispatch={dispatch}
         currentUserId={currentUserId}
       />
-      {/* INVITE FORM – OWNER ONLY */}
-      <Invite
-        userId={currentUserId}
-        dispatch={dispatch} // ← Invite handles ADD_MEMBER
-        isOwner={isOwner}
-      />
 
       {/* DEV DEBUG */}
       {process.env.NODE_ENV === "development" && (
         <small className="block mt-4 text-gray-800 text-xs text-center italic" />
       )}
     </div>
-  )
-}
+  );
+};
 
 // PropTypes – runtime validation
 MemberList.propTypes = {
@@ -62,11 +69,11 @@ MemberList.propTypes = {
   ownerId: PropTypes.string.isRequired,
   userId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
-}
+};
 
 MemberList.defaultProps = {
   members: [],
-}
+};
 
 export const MembersListContent = ({
   members,
@@ -81,7 +88,7 @@ export const MembersListContent = ({
           {members.map((member) => (
             <MemberRow
               currentUserId={currentUserId}
-              key={member.userId}
+              key={member.memberId}
               member={member}
               ownerId={ownerId}
               dispatch={dispatch} // ← MemberRow handles remove/leave
@@ -95,5 +102,5 @@ export const MembersListContent = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
