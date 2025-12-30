@@ -16,6 +16,7 @@ import {
   createList,
   deleteList,
   updateList,
+  archiveList,
 } from "../components/homePage/useHomePage.js";
 import {
   addItemToList,
@@ -98,7 +99,27 @@ export function ShoppingListProvider({ children }) {
   const updateById = async (shopListId, updateData) => {
     try {
       const updatedList = await updateList(shopListId, updateData);
-      dispatch({ type: actionTypes.renameList, payload: updatedList });
+
+      // 1. Dispatch inside here so the global state updates automatically
+      dispatch({ type: actionTypes.updateListSuccess, payload: updatedList });
+
+      // 2. CRITICAL: Return the data so the calling component can see it
+      return updatedList;
+    } catch (err) {
+      console.error("Update failed:", err);
+      throw err;
+    }
+  };
+
+  const archiveListById = async (shopListId, updateData) => {
+    try {
+      const updatedList = await archiveList(shopListId, updateData);
+
+      // 1. Dispatch inside here so the global state updates automatically
+      dispatch({ type: actionTypes.updateListSuccess, payload: updatedList });
+
+      // 2. CRITICAL: Return the data so the calling component can see it
+      return updatedList;
     } catch (err) {
       console.error("Update failed:", err);
       throw err;
@@ -188,6 +209,7 @@ export function ShoppingListProvider({ children }) {
         createNewList,
         deleteListById,
         updateById,
+        archiveListById,
         addItem,
         inviteMemberToList,
         removeMember,
@@ -201,6 +223,7 @@ export function ShoppingListProvider({ children }) {
       createNewList,
       deleteListById,
       updateById,
+      archiveListById,
       inviteMemberToList,
       addItem,
       removeMember,

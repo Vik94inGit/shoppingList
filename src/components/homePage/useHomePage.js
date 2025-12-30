@@ -20,10 +20,12 @@ export const authFetch = async (url, options = {}) => {
     },
   });
 
-  // Handle non-OK responses globally
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
+    // Attach the status to the error object
+    const error = new Error(errorData.error || `HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 
   // Some endpoints return nothing (e.g. DELETE), so return empty object if no content
@@ -67,11 +69,52 @@ export const createList = async (data) => {
  * @param {string} shopListId
  * @param {object} data  fields to update
  */
-export const updateList = async (shopListId, data) => {
-  return authFetch(`${API_BASE_URL}/lists/${shopListId}`, {
-    method: "PATCH", // or "PATCH" if you prefer partial updates
-    body: JSON.stringify(data),
+export const updateList = async (shopListId, updates) => {
+  // authFetch will throw an Error if !response.ok
+  // So if this line finishes, the request was successful.
+  const data = await authFetch(`${API_BASE_URL}/lists/${shopListId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
   });
+
+  console.log("Updated data in useHomePage for update", updates);
+
+  // 'data' is the parsed JSON returned from authFetch
+  console.log("Update successful:", data);
+  return data;
+};
+
+export const resetDatabase = async () => {
+  // authFetch zajistí, že req.user.id na backendu bude existovat
+  const response = await authFetch(`${API_BASE_URL}/lists/dev/reset`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Reset databáze selhal");
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  }
+
+  return { message: "Reset proběhl úspěšně" };
+};
+
+export const archiveList = async (shopListId, updates) => {
+  // authFetch will throw an Error if !response.ok
+  // So if this line finishes, the request was successful.
+  const data = await authFetch(`${API_BASE_URL}/lists/${shopListId}/archive`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+
+  console.log("Updated data in useHomePage for update", updates);
+
+  // 'data' is the parsed JSON returned from authFetch
+  console.log("Update successful:", data);
+  return data;
 };
 
 /**

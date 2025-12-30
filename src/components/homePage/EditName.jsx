@@ -4,13 +4,16 @@ import PropTypes from "prop-types";
 import { actionTypes } from "../../context/ReducerHelper";
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 
-export function EditName({ name, shopListId, dispatch, isOwner }) {
+export function EditName({ name, shopListId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(name);
-  const { actions } = useShoppingList();
+  const { actions, lists } = useShoppingList();
   const { updateById } = actions;
+  const list = lists.find((l) => l.shopListId === shopListId);
 
   console.log("isOwner:", isOwner);
+  console.log("list in EditName", list);
+  console.log("list.isArchived in EditName", list.isArchived);
 
   useEffect(() => {
     setNewName(name);
@@ -23,26 +26,28 @@ export function EditName({ name, shopListId, dispatch, isOwner }) {
   };
 
   const handleInputChange = (e) => {
+    e.stopPropagation();
     const value = e.target.value;
     setNewName(value);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     const trimmed = newName.trim();
+    if (!trimmed) return;
+    console.log("updared name for Backend", list.isArchived);
+    try {
+      // We don't need to dispatch here anymore because updateById handles it!
+      await updateById(shopListId, {
+        name: trimmed,
+        isArchived: list.isArchived,
+      });
 
-    if (!trimmed) {
-      return;
+      setIsEditing(false);
+    } catch (error) {
+      // Handle error (maybe show a toast)
     }
-    await updateById(shopListId, { name: trimmed });
-    dispatch({
-      type: actionTypes.renameList,
-      payload: { shopListId, newName: trimmed },
-    });
-
-    setIsEditing(false);
   };
 
   // HANDLE CANCEL
@@ -56,7 +61,14 @@ export function EditName({ name, shopListId, dispatch, isOwner }) {
   return (
     <div>
       {isEditing ? (
-        <form className="flex gap-4" onSubmit={handleSubmit}>
+        <form
+          className="flex gap-4"
+          onSubmit={handleSubmit}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* <h3 className="text-2xl font-bold text-gray-900 flex-1 dark:text-white">
+            {name}
+          </h3> */}
           <input
             type="text"
             className="border p-1 rounded"
@@ -75,15 +87,16 @@ export function EditName({ name, shopListId, dispatch, isOwner }) {
         </form>
       ) : (
         <div className="flex gap-4">
-          <h3 className="text-2xl font-bold text-gray-900 flex-1">{name}</h3>
           {isOwner && (
-            <button
-              type="button"
-              onClick={handleEditClick}
-              className="mt-4 flex justify-end"
-            >
-              ✏️
-            </button>
+            <div onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="w-7 h-7 flex items-center justify-center rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors text-sm"
+              >
+                ✎
+              </button>
+            </div>
           )}
         </div>
       )}

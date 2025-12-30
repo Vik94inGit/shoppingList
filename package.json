@@ -11,12 +11,13 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.17",
+    "i18next": "^23.6.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-i18next": "^13.3.1",
     "react-router-dom": "^7.9.5",
-    "i18next": "^23.6.0",
-    "react-i18next": "^13.3.1"
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

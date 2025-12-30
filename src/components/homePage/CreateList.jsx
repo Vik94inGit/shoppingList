@@ -1,8 +1,6 @@
 // src/components/shoppingList/CreateListModal.jsx
 import { useState, useCallback } from "react";
 
-import { MemberList, MembersListContent } from "../shoppingList/MemberList";
-import ItemList from "../shoppingList/ItemList"; // ← your ItemsList (renamed)
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 
 export default function CreateListModal({ isOpen, onClose }) {
@@ -17,6 +15,8 @@ export default function CreateListModal({ isOpen, onClose }) {
   // ── Dropdown state ─────────────────────────────────────────────────
   const [membersOpen, setMembersOpen] = useState(true);
   const [itemsOpen, setItemsOpen] = useState(true);
+
+  // const isOwner = ownerId === currentUserId;
 
   const handleClose = useCallback(() => {
     setName("");
@@ -37,8 +37,9 @@ export default function CreateListModal({ isOpen, onClose }) {
 
     const newList = {
       name: name.trim(),
+      ownerId: currentUserId,
       members,
-      items: items.map((i) => ({ ...i, isArchieved: false })),
+      items: items.map((i) => ({ ...i, isArchived: false })),
     };
     try {
       console.log("Creating new list on frontend:", newList);
@@ -48,6 +49,9 @@ export default function CreateListModal({ isOpen, onClose }) {
       alert("Nepodařilo se uložit seznam na server.");
     }
   }, [name, currentUser, members, items, actions, handleClose]);
+
+  const isOwner = true;
+
   if (!isOpen) return null;
 
   return (
@@ -70,45 +74,6 @@ export default function CreateListModal({ isOpen, onClose }) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               placeholder="Např. Týdenní nákup"
             />
-          </div>
-
-          {/* ── Members Dropdown ── */}
-          <div className="mb-4">
-            <button
-              onClick={() => setMembersOpen(!membersOpen)}
-              className="w-full text-left px-4 py-2 bg-blue-50 rounded-t-md font-medium text-blue-700 hover:bg-blue-100 transition flex justify-between items-center"
-            >
-              Členové ({members.length})<span>{membersOpen ? "▲" : "▼"}</span>
-            </button>
-            {membersOpen && (
-              <div className="border border-t-0 border-gray-300 rounded-b-md p-4 bg-gray-50">
-                <MembersListContent
-                  members={members}
-                  ownerId={"ownerId"}
-                  userId={"userId"}
-                  dispatch={dispatch}
-                  currentUserId={currentUserId}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* ── Items Dropdown ── */}
-          <div className="mb-6">
-            <button
-              onClick={() => setItemsOpen(!itemsOpen)}
-              className="w-full text-left px-4 py-2 bg-green-50 rounded-t-md font-medium text-green-700 hover:bg-green-100 transition flex justify-between items-center"
-            >
-              Položky ({items.length})<span>{itemsOpen ? "▲" : "▼"}</span>
-            </button>
-            {itemsOpen && (
-              <div className="border border-t-0 border-gray-300 rounded-b-md p-4 bg-gray-50">
-                <ItemList
-                  items={items}
-                  dispatch={{ type: "NOOP" }} // not used in create
-                />
-              </div>
-            )}
           </div>
 
           {/* ── Actions ── */}

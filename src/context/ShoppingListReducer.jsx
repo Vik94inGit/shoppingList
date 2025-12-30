@@ -6,16 +6,6 @@ export const ShoppingListReducer = (state, action) => {
 
   switch (action.type) {
     // --- PŘEJMENOVÁNÍ SEZNAMU ---
-    case actionTypes.renameList: {
-      const { shopListId, newName } = action.payload || {};
-      if (!shopListId || !newName) return state;
-
-      updatedLists = state.lists.map((list) =>
-        list.shopListId === shopListId ? { ...list, name: newName } : list
-      );
-
-      return { ...state, lists: updatedLists };
-    }
 
     // --- PŘIDÁNÍ ČLENA ---
     case actionTypes.addMember: {
@@ -37,6 +27,27 @@ export const ShoppingListReducer = (state, action) => {
       return { ...state, lists: updatedLists };
     }
 
+    case actionTypes.updateMemberName:
+      return {
+        ...state,
+        // Projdeme všechny seznamy
+        lists: state.lists.map((list) => {
+          // Najdeme ten, který chceme upravit
+          if (list.shopListId === action.payload.shopListId) {
+            return {
+              ...list,
+              // V tomto seznamu projdeme členy a upravíme jméno tomu správnému
+              members: list.members.map((member) =>
+                member.memberId === action.payload.memberId
+                  ? { ...member, userName: action.payload.newName }
+                  : member
+              ),
+            };
+          }
+          return list;
+        }),
+      };
+
     // --- ODEBRÁNÍ ČLENA ---
     case actionTypes.removeMember: {
       const { shopListId, memberId } = action.payload;
@@ -55,13 +66,13 @@ export const ShoppingListReducer = (state, action) => {
     }
 
     case actionTypes.leaveList: {
-      const { shopListId, userId } = action.payload;
+      const { shopListId, memberId } = action.payload;
 
       const updatedLists = state.lists.map((list) =>
         list.shopListId === shopListId
           ? {
               ...list,
-              members: list.members.filter((m) => m.memberId !== userId),
+              members: list.members.filter((m) => m.memberId !== memberId),
             }
           : list
       );
@@ -135,18 +146,13 @@ export const ShoppingListReducer = (state, action) => {
     }
 
     // --- RESET JEDNOHO SEZNAMU ---
-    case actionTypes.resetList: {
-      const shopListId = action.payload?.shopListId;
-      if (!shopListId) return state;
-
-      updatedLists = state.lists.map((list) =>
-        list.shopListId === shopListId
-          ? { ...list, items: [], members: [{ memberId: list.ownerId }] }
-          : list
-      );
-
-      return { ...state, lists: updatedLists };
-    }
+    // shoppingListReducer.js
+    case actionTypes.resetHomePage:
+      return {
+        ...state,
+        lists: [], // Toto okamžitě vymaže UI
+        loading: false,
+      };
 
     // --- ODEJÍT ZE SEZNAMU ---
     case actionTypes.leaveList: {
@@ -188,9 +194,6 @@ export const ShoppingListReducer = (state, action) => {
     }
 
     // --- RESET HOMEPAGE ---
-    case actionTypes.resetHomePage: {
-      return { ...state, lists: SHOPPING_LIST_DATA, loading: false };
-    }
 
     // --- PŘIDÁNÍ NOVÉHO SEZNAMU ---
     case actionTypes.addList: {
@@ -201,6 +204,14 @@ export const ShoppingListReducer = (state, action) => {
       };
       return { ...state, lists: [...state.lists, newList] };
     }
+
+    case actionTypes.updateListSuccess:
+      return {
+        ...state,
+        lists: state.lists.map((l) =>
+          l.shopListId === action.payload.shopListId ? action.payload : l
+        ),
+      };
 
     case actionTypes.setLoading:
       return { ...state, loading: action.payload };

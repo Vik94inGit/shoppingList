@@ -1,43 +1,36 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const ChangeLanguage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {
-    i18n: { language, changeLanguage },
-  } = useTranslation();
+const LANGUAGES = [
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "cz", label: "Čeština", flag: "🇨🇿" },
+];
 
-  const onChangeLanguage = (lng) => {
-    changeLanguage(lng);
-    setIsMenuOpen(false);
+export const ChangeLanguage = () => {
+  const { i18n } = useTranslation();
+
+  const handleLanguageChange = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
-    <>
-      <button
-        onClick={() => setIsMenuOpen((p) => !p)}
-        className="fixed top-5 right-14"
-      >
-        {language}
-      </button>
-      {isMenuOpen && (
-        <div className="fixed right-12 top-12 bg-white border  rounded-lg shadow-md min-w-[120px] z-50">
-          <>
-            <button
-              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-              onClick={() => onChangeLanguage("en")}
-            >
-              en
-            </button>
-            <button
-              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-              onClick={() => onChangeLanguage("cz")}
-            >
-              cz
-            </button>
-          </>
-        </div>
-      )}
-    </>
+    <div className="flex flex-col gap-2 w-full">
+      {LANGUAGES.map((lang) => (
+        <button
+          key={lang.code}
+          onClick={() => handleLanguageChange(lang.code)}
+          className={`
+            flex items-center justify-between px-4 py-3 rounded-xl transition-all
+            ${
+              i18n.language === lang.code
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }
+          `}
+        >
+          <span className="font-medium">{lang.label}</span>
+          <span className="text-lg">{lang.flag}</span>
+        </button>
+      ))}
+    </div>
   );
 };

@@ -1,106 +1,77 @@
-// src/components/shoppingList/MemberList.jsx
-import React from "react";
-import PropTypes from "prop-types";
-import MemberRow from "./MemberRow.jsx"; // Fixed: correct component name
-import Invite from "./Invite.jsx";
+import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { actionTypes } from "../../context/ReducerHelper";
+import { Invite } from "./Invite";
 
-/**
- * MEMBERLIST – DISPLAYS ALL LIST MEMBERS + INVITE FORM
- *
- * DATAFLOW:
- * 1. Props → `members[]`, `ownerId`, `userId`, `dispatch`
- * 2. Compute → `isOwner`, `memberArray` (defensive)
- * 3. Render:
- *    - Header with live count
- *    - List of <MemberRow /> (each gets dispatch)
- *    - <Invite /> (owner-only)
- * 4. Actions → delegated to child components
- *
- * LOGS: `[MemberList]` prefix
- */
-export const MemberList = ({ members, ownerId, currentUserId, dispatch }) => {
-  const isOwner = ownerId === currentUserId;
-  console.log(
-    "[MemberList] Rendering for currentUserId:",
-    currentUserId,
-    "ownerId:",
-    ownerId,
-    "isOwner:",
-    isOwner,
-    "members:",
-    members
-  );
-  return (
-    <div className="mt-5 p-4 border border-gray-300 rounded-[8px] bg-gray-100">
-      {/* HEADER */}
-      <h3 className="mb-4 pb-2 border-b-2 border-blue-600 text-blue-800 font-semibold">
-        👥 Members ({members.length})
-      </h3>
-      {/* INVITE FORM – OWNER ONLY */}
-      <Invite
-        dispatch={dispatch} // ← Invite handles ADD_MEMBER
-        isOwner={isOwner}
-      />
-      {/* MEMBERS LIST */}
-      <MembersListContent
-        members={members}
-        ownerId={ownerId}
-        dispatch={dispatch}
-        currentUserId={currentUserId}
-      />
+import { MemberRow } from "./MemberRow";
 
-      {/* DEV DEBUG */}
-      {process.env.NODE_ENV === "development" && (
-        <small className="block mt-4 text-gray-800 text-xs text-center italic" />
-      )}
-    </div>
-  );
-};
-
-// PropTypes – runtime validation
-MemberList.propTypes = {
-  members: PropTypes.arrayOf(
-    PropTypes.shape({
-      userId: PropTypes.string.isRequired,
-      userName: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-    })
-  ),
-  ownerId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
-};
-
-MemberList.defaultProps = {
-  members: [],
-};
-
-export const MembersListContent = ({
+export function MemberList({
   members,
   ownerId,
-  dispatch,
   currentUserId,
-}) => {
+  dispatch,
+  shopListId,
+}) {
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [editingMemberId, setEditingMemberId] = useState(null); // Nový stav
+  const menuRef = useRef(null);
+  const { t } = useTranslation();
+  const isOwner = currentUserId === ownerId;
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleRemoveMember = (memberId) => {
+    if (window.confirm(t("pages.shoppingList.confirmRemoveMember"))) {
+      dispatch({
+        type: actionTypes.removeMember,
+        payload: { shopListId, memberId },
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="border border-gray-200 rounded-[6px] p-3 mb-5 bg-white min-h-[80px]">
-      {members.length > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+    <div className="space-y-6">
+      {/* 1. INVITE COMPONENT */}
+      <Invite dispatch={dispatch} isOwner={isOwner} userId={currentUserId} />
+
+      <hr className="border-gray-200 dark:border-gray-700 my-6" />
+
+      {/* 2. MEMBERS LIST */}
+      <div className="mt-4">
+        <h3 className="text-lg font-bold mb-4 dark:text-white px-2">
+          {t("pages.shoppingList.members.title")} ({members.length})
+        </h3>
+
+        {/* Using a div container because MemberRow (with inline styles) is a div */}
+        <div className="flex flex-col gap-2">
           {members.map((member) => (
             <MemberRow
-              currentUserId={currentUserId}
-              key={member.memberId}
+              key={member.memberId || member._id}
               member={member}
               ownerId={ownerId}
-              dispatch={dispatch} // ← MemberRow handles remove/leave
+              currentUserId={currentUserId}
+              dispatch={dispatch}
             />
           ))}
         </div>
-      ) : (
-        <div className="p-5 text-center text-gray-900 italic bg-gray-200 rounded-[6px]">
-          <p>Nobody is here</p>
-          <small>(pouze vlastník je automaticky členem)</small>
-        </div>
-      )}
+      </div>
     </div>
   );
-};
+}

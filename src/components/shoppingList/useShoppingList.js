@@ -52,6 +52,15 @@ export const addMemberToList = async (shopListId, memberData) => {
   });
 };
 
+export const updateMember = async (shopListId, memberId, memberData) => {
+  return authFetch(
+    `${API_BASE_URL}/ShoppingList/${shopListId}/members/${memberId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(memberData),
+    }
+  );
+};
 /**
  * Remove a member from the list
  */

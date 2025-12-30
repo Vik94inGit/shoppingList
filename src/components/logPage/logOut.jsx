@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function LogoutButton() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     // Remove authentication data
@@ -16,7 +18,7 @@ export function LogoutButton() {
   };
   return (
     <button onClick={handleLogout} className="logout-btn">
-      Log out
+      {t("pages.logout")}
     </button>
   );
 }

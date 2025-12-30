@@ -55,7 +55,14 @@ export function LoginPage() {
   return (
     <div className="w-full flex justify-center h-screen items-center">
       <div className="flex flex-col">
-        <h2 style={{ margin: "15px 0, bold", display: "block" }}>
+        <h2
+          style={{
+            fontSize: "2rem", // increase size (you can adjust: 2rem, 3rem, etc.)
+            fontWeight: "bold", // optional: make it bolder
+            margin: "0 0 20px 0", // optional: remove default top/bottom margin and add bottom spacing
+            textAlign: "center",
+          }}
+        >
           {t("pages.login.shoppingList")}
         </h2>
 
@@ -100,6 +107,7 @@ export function LoginPage() {
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                 backgroundColor: "#fff",
                 fontFamily: "Arial, sans-serif",
+                color: "#000",
               }}
             />
           </div>

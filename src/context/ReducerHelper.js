@@ -21,6 +21,7 @@ export const actionTypes = {
   renameList: "RENAME_LIST",
   addMember: "ADD_MEMBER",
   removeMember: "REMOVE_MEMBER",
+  updateMemberName: "UPDATE_MEMBER_NAME",
   addItem: "ADD_ITEM",
   updateItem: "UPDATE_ITEM",
   toggleItemResolved: "TOGGLE_ITEM_RESOLVED",

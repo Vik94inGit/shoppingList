@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { actionTypes } from "../../context/ReducerHelper";
-
+import { useTranslation } from "react-i18next";
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 import { useParams } from "react-router-dom";
 import { addMemberToList } from "../shoppingList/useShoppingList.js";
@@ -19,12 +19,13 @@ import { addMemberToList } from "../shoppingList/useShoppingList.js";
  *
  * LOGS: prefixed with `[Invite]` → filter in Console!
  */
-export default function Invite({ dispatch, isOwner }) {
+export function Invite({ dispatch, isOwner }) {
   // LOCAL STATE
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
-  const { actions } = useShoppingList();
-  const inviteMemberToList = actions.inviteMemberToList;
+
+  const { t } = useTranslation();
+
   const { shopListId } = useParams();
   const [status, setStatus] = useState({ type: null, text: "" });
 
@@ -51,7 +52,10 @@ export default function Invite({ dispatch, isOwner }) {
     const trimmedName = userName.trim();
 
     if (!trimmedEmail) {
-      setStatus({ type: "error", text: "Zadejte prosím email" });
+      setStatus({
+        type: "error",
+        text: t("components.invite.errors.required"),
+      });
       return;
     }
 
@@ -77,7 +81,9 @@ export default function Invite({ dispatch, isOwner }) {
       // Show success message
       setStatus({
         type: "success",
-        text: `${newMemberFromBackend.userName || trimmedEmail} byl přidán!`,
+        text: t("components.invite.success", {
+          name: userName || trimmedEmail,
+        }),
       });
 
       // Clear form
@@ -87,11 +93,11 @@ export default function Invite({ dispatch, isOwner }) {
       console.error("Failed to add member:", error);
 
       // Determine error message
-      let errorMsg = "Nepodařilo se přidat člena";
+      let errorMsg = t("components.invite.errors.default");
       if (error.message?.includes("already a member")) {
-        errorMsg = "Uživatel je již v seznamu";
+        errorMsg = t("components.invite.errors.alreadyMember");
       } else if (error.message?.includes("not registered")) {
-        errorMsg = "Uživatel není registrovaný – nelze přidat";
+        errorMsg = t("components.invite.errors.notRegistered");
       }
 
       setStatus({ type: "error", text: errorMsg });
@@ -99,91 +105,92 @@ export default function Invite({ dispatch, isOwner }) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "20px",
-        padding: "15px",
-        border: "2px solid #007bff",
-        borderRadius: "8px",
-        backgroundColor: "#e3f2fd",
-        boxShadow: "0 2px 4px rgba(0,123,255,0.1)",
-      }}
-    >
-      {/* HEADER */}
-      <h4 style={{ margin: "0 0 12px 0", color: "#1565c0", fontWeight: "600" }}>
-        Pozvat nového člena (Pouze pro Vlastníka)
+    <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg">
+      {/* Header */}
+      <h4 className="text-xl font-bold text-blue-800 dark:text-gray-100 mb-5">
+        {t("components.invite.title")}
       </h4>
 
-      {/* FORM */}
+      {/* Status Message */}
+      {status.type && (
+        <div
+          className={`mb-5 p-4 rounded-xl text-sm font-medium transition-all ${
+            status.type === "success"
+              ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800"
+              : "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
+          }`}
+        >
+          {status.text}
+        </div>
+      )}
+
+      {/* Form - Přidáno items-end pro zarovnání spodní hrany */}
       <form
         onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          gap: "10px",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-        aria-label="Formulář pro pozvání nového člena"
+        className="grid grid-cols-1 gap-y-4 dark:text-red dark:bg-gray-10000 "
+        aria-label={t("components.invite.formAria")}
       >
-        {/* USERNAME INPUT */}
-        <input
-          type="text"
-          placeholder="Jméno uživatele (např. Petr)"
-          value={userName}
-          onChange={handleNameChange}
-          required
-          style={{
-            minWidth: "150px",
-            padding: "8px 12px",
-            border: "1px solid #90caf9",
-            borderRadius: "4px",
-            fontSize: "14px",
-          }}
-          aria-label="Jméno uživatele"
-        />
+        {/* Name Input */}
+        <div className="w-full flex-1 sm:flex-1">
+          <label
+            htmlFor="invite-name"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            {t("components.invite.fields.name")}
+          </label>
+          <input
+            id="invite-name"
+            type="text"
+            maxLength={30}
+            placeholder={t("components.invite.placeholders.name")}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-xl 
+                       bg-white dark:bg-gray-800 
+                       text-gray-900 dark:text-white 
+                       placeholder-gray-500 dark:placeholder-gray-400 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                       transition disabled:opacity-60"
+            required
+          />
+        </div>
 
-        {/* EMAIL INPUT */}
-        <input
-          type="email"
-          placeholder="Email pro pozvánku (např. petr@example.com)"
-          value={email}
-          onChange={handleEmailChange}
-          required
-          style={{
-            flexGrow: 1,
-            minWidth: "200px",
-            padding: "8px 12px",
-            border: "1px solid #90caf9",
-            borderRadius: "4px",
-            fontSize: "14px",
-          }}
-          aria-label="Emailová adresa"
-        />
+        {/* Email Input */}
+        <div className="w-full sm:flex-1">
+          <label
+            htmlFor="invite-email"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1"
+          >
+            {t("components.invite.fields.email")}
+          </label>
+          <input
+            id="invite-email"
+            type="email"
+            maxLength={30}
+            placeholder={t("components.invite.placeholders.email")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-xl 
+                       bg-white dark:bg-gray-800 
+                       text-gray-900 dark:text-white 
+                       placeholder-gray-500 dark:placeholder-gray-400 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                       transition disabled:opacity-60"
+            required
+          />
+        </div>
 
-        {/* SUBMIT BUTTON */}
+        {/* Submit Button - Odstraněno flex items-end div, tlačítko je nyní přímo v gridu/flexu */}
         <button
           type="submit"
-          disabled={!email.trim() || !userName.trim()}
-          style={{
-            backgroundColor:
-              email.trim() && userName.trim() ? "#007bff" : "#bbdefb",
-
-            color: "black",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            cursor: email.trim() && userName.trim() ? "pointer" : "not-allowed",
-            fontWeight: "bold",
-            fontSize: "14px",
-            transition: "all 0.2s",
-          }}
-          aria-label="Poslat pozvánku"
+          className="w-full sm:w-auto px-8 py-3 h-[50px] bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed 
+                     text-white font-semibold rounded-xl shadow-md hover:shadow-lg 
+                     transition-all duration-200 
+                     focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
         >
-          Send invitation
+          {t("components.invite.submit")}
         </button>
       </form>
-
-      {/* DEBUG NOTE */}
     </div>
   );
 }
