@@ -105,7 +105,7 @@ export function Invite({ dispatch, isOwner }) {
   };
 
   return (
-    <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg">
+    <div className="mt-8 p-6 pb-10 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg mb-10">
       {/* Header */}
       <h4 className="text-xl font-bold text-blue-800 dark:text-gray-100 mb-5">
         {t("components.invite.title")}

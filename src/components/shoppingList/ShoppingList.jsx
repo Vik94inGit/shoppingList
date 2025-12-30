@@ -89,7 +89,7 @@ export function ShoppingList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 transition-colors duration-300">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 py-8 px-4 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         {/* Horní lišta: Zpět + Menu */}
         <div className="flex justify-between items-center mb-8">
@@ -293,23 +293,17 @@ export function ShoppingList() {
         {/* Modal: Členové */}
         {isMembersListVisible && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex  justify-center z-50 p-4 overflow-y-auto"
             onClick={() => setIsMembersListVisible(false)}
           >
             <div
               className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-lg w-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between mb-6">
                 <h2 className="text-2xl font-bold dark:text-white">
                   {t("pages.shoppingList.membersTitle")}
                 </h2>
-                <button
-                  onClick={() => setIsMembersListVisible(false)}
-                  className="text-3xl text-gray-400 hover:text-gray-600"
-                >
-                  ×
-                </button>
               </div>
               <MemberList
                 members={members}
@@ -317,6 +311,7 @@ export function ShoppingList() {
                 currentUserId={currentUserId}
                 dispatch={dispatch}
                 shopListId={shopListId}
+                onClose={() => setIsMembersListVisible(false)}
               />
             </div>
           </div>

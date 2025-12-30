@@ -11,6 +11,7 @@ export function MemberList({
   currentUserId,
   dispatch,
   shopListId,
+  onClose,
 }) {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -36,16 +37,17 @@ export function MemberList({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  if (!isVisible) return null;
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* <button
-        onClick={() => setIsVisible(false)}
-        className="absolute top-4 right-4 p-1 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+    <div className="space-y-6 relative">
+      <button
+        onClick={onClose}
+        className="absolute -top-16 -right-4 p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
         aria-label="Close"
       >
-        <X size={20} /> {/* Or just use "✕" string */}
-      {/* </button> */}
+        <X size={20} />
+      </button>
       {/* 1. INVITE COMPONENT */}
       <Invite dispatch={dispatch} isOwner={isOwner} userId={currentUserId} />
 
