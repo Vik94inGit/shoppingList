@@ -50,7 +50,7 @@ export const ThemeToggle = () => {
 
       {/* Volitelný popisek pod přepínačem pro lepší UX v menu */}
       <p className="text-center text-[10px] mt-2 text-gray-400 uppercase tracking-widest font-bold">
-        {isDark ? t("common.darkTheme") : t("common.lightTheme")}
+        {isDark ? t("common.dark") : t("common.light")}
       </p>
     </div>
   );

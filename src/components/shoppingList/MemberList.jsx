@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { actionTypes } from "../../context/ReducerHelper";
 import { Invite } from "./Invite";
-
+import { X } from "lucide-react";
 import { MemberRow } from "./MemberRow";
 
 export function MemberList({
@@ -13,7 +13,7 @@ export function MemberList({
   shopListId,
 }) {
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [editingMemberId, setEditingMemberId] = useState(null); // Nový stav
+  const [isVisible, setIsVisible] = useState(true);
   const menuRef = useRef(null);
   const { t } = useTranslation();
   const isOwner = currentUserId === ownerId;
@@ -27,15 +27,6 @@ export function MemberList({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleRemoveMember = (memberId) => {
-    if (window.confirm(t("pages.shoppingList.confirmRemoveMember"))) {
-      dispatch({
-        type: actionTypes.removeMember,
-        payload: { shopListId, memberId },
-      });
-    }
-  };
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -47,7 +38,14 @@ export function MemberList({
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
+      {/* <button
+        onClick={() => setIsVisible(false)}
+        className="absolute top-4 right-4 p-1 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+        aria-label="Close"
+      >
+        <X size={20} /> {/* Or just use "✕" string */}
+      {/* </button> */}
       {/* 1. INVITE COMPONENT */}
       <Invite dispatch={dispatch} isOwner={isOwner} userId={currentUserId} />
 

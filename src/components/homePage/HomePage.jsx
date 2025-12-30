@@ -184,7 +184,7 @@ export default function HomePage() {
                     ) : (
                       <div className="py-1 text-center">
                         <p className="text-[10px] font-bold text-gray-400 uppercase px-2 mb-4 tracking-widest text-left">
-                          {t("common.selectTheme", "Vyberte téma")}
+                          {t("common.selectTheme", "Vyberte tému")}
                         </p>
                         <ThemeToggle />
                       </div>
@@ -208,7 +208,7 @@ export default function HomePage() {
                       onClick={() => setActiveSubmenu("theme")}
                       className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl flex justify-between items-center text-sm dark:text-gray-200"
                     >
-                      <span>✨ {t("common.theme", "Téma")}</span>
+                      <span>✨ {t("common.theme")}</span>
                       <span className="text-gray-400">›</span>
                     </button>
 
@@ -216,9 +216,9 @@ export default function HomePage() {
 
                     {/* Sekce Filtry */}
                     <p className="text-[10px] font-bold text-gray-400 uppercase px-3 py-1 tracking-widest">
-                      {t("common.filter", "Zobrazení")}
+                      {t("common.filter")}
                     </p>
-                    {["all", "owned", "shared", "archived"].map((f) => (
+                    {[, "all", "owned", "shared", "archived"].map((f) => (
                       <button
                         key={f}
                         onClick={() => {
@@ -231,20 +231,13 @@ export default function HomePage() {
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         }`}
                       >
-                        {f === "all" &&
-                          t("pages.shoppingLists.filterAll", "Všechny seznamy")}
+                        {f === "all" && t("pages.shoppingLists.filters.all")}
                         {f === "owned" &&
-                          t("pages.shoppingLists.filterOwned", "Moje seznamy")}
+                          t("pages.shoppingLists.filters.owned")}
                         {f === "shared" &&
-                          t(
-                            "pages.shoppingLists.filterShared",
-                            "Sdílené se mnou"
-                          )}
+                          t("pages.shoppingLists.filters.shared")}
                         {f === "archived" &&
-                          t(
-                            "pages.shoppingLists.filterArchived",
-                            "Archivované"
-                          )}
+                          t("pages.shoppingLists.filters.archived")}
                       </button>
                     ))}
 

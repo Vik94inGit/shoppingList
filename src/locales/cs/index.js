@@ -6,13 +6,37 @@ export const csTranslations = {
       loadingUser: "Načítání uživatelské relace...",
       back: "Zpět",
       settings: "Nastavení",
+      filter: "Zobrazení",
       language: "Jazyk",
       theme: "Téma",
       done: "Hotovo",
       pending: "Zbývá",
       showChart: "Ukazat graf",
+      theme: "Téma",
+      dark: "tmava",
+      light: "světla",
     },
     components: {
+      createList: {
+        create: "Vytvořit nový seznam",
+        cancel: " Zrušit",
+        name: "Název seznamu",
+        createList: " Vytvořit seznam",
+        prompt: "Např. Týdenní nákup",
+      },
+      itemForm: {
+        placeholder: {
+          name: "Název položky",
+          count: "Počet",
+        },
+        submit: "Uložit",
+        create: "Přidat",
+        cancel: "Zrušit",
+        loading: "Ukládám...",
+        alert: {
+          nameRequired: "Zadejte prosím název položky.",
+        },
+      },
       itemList: {
         emptyMessage:
           "Seznam je prázdný, nebo jsou všechny položky skryty filtrem.",
@@ -45,6 +69,11 @@ export const csTranslations = {
         },
         addButton: "Přidat",
         loading: "Přidávám...",
+        alert: {
+          nameInvalid: "Název musí mít 1 až 100 znaků.",
+          countInvalid: "Množství musí být číslo mezi 1 a 99 999.",
+          addFailed: "Nepodařilo se přidat položku. Zkuste to znovu.",
+        },
       },
       shoppingListCard: {
         items_count1: "položka",
@@ -52,6 +81,25 @@ export const csTranslations = {
         items_count2: "položek",
         archived_label: "Archivováno",
         active_label: "Archivovat?",
+      },
+      itemRow: {
+        resolved: "hotovo",
+        toggleResolved: "Označit jako vyřešené/nevyřešené",
+        menu: {
+          open: "Otevřít menu položky",
+          edit: "Upravit",
+          save: "Uložit",
+          cancel: "Zrušit",
+          delete: "Smazat",
+        },
+        editPlaceholder: {
+          name: "Název položky",
+        },
+        confirmDelete: "Opravdu smazat „{name}“?",
+        alert: {
+          updateFailed: "Nepodařilo se aktualizovat položku.",
+          deleteFailed: "Nepodařilo se smazat položku.",
+        },
       },
     },
     pages: {

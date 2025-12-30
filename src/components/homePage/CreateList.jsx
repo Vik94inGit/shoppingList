@@ -1,6 +1,6 @@
 // src/components/shoppingList/CreateListModal.jsx
 import { useState, useCallback } from "react";
-
+import { useTranslation } from "react-i18next";
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 
 export default function CreateListModal({ isOpen, onClose }) {
@@ -8,6 +8,8 @@ export default function CreateListModal({ isOpen, onClose }) {
   // Define currentUserId from the currentUser object safely
   const currentUserId = currentUser?.id;
   // ── Form state ─────────────────────────────────────────────────────
+  const { t } = useTranslation();
+
   const [name, setName] = useState("");
   const [items, setItems] = useState([]);
   const [members, setMembers] = useState([]);
@@ -54,42 +56,52 @@ export default function CreateListModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  //  components: {
+  //     createList: {
+  //       create: "Create new list",
+  //       cancel: "Cancel",
+  //       name: "Name of new list",
+  //       createList: " Create",
+  //     },
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">
-            Vytvořit nový seznam
-          </h2>
+    <div className="pb-28 md:pb-8">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-screen overflow-y-auto">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+              Vytvořit nový seznam
+            </h2>
 
-          {/* ── Name ── */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Název seznamu
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Např. Týdenní nákup"
-            />
-          </div>
+            {/* ── Name ── */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("components.createList.name")}
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full text-gray-900 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder={t("components.createList.prompt")}
+              />
+            </div>
 
-          {/* ── Actions ── */}
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={handleClose}
-              className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
-            >
-              Zrušit
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Vytvořit seznam
-            </button>
+            {/* ── Actions ── */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleClose}
+                className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+              >
+                {t("components.createList.cancel")}
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                {t("components.createList.createList")}
+              </button>
+            </div>
           </div>
         </div>
       </div>

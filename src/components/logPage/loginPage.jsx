@@ -86,6 +86,7 @@ export function LoginPage() {
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                 backgroundColor: "#fff",
                 fontFamily: "Arial, sans-serif",
+                color: "black",
               }}
             />
           </div>

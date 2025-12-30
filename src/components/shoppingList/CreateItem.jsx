@@ -16,12 +16,12 @@ export function CreateItem({ shopListId }) {
     const countNum = Number(newCount);
 
     if (!trimmedName || trimmedName.length > 100) {
-      alert("Název musí mít 1 až 100 znaků.");
+      alert(t("components.createItem.alert.nameInvalid"));
       return;
     }
 
     if (isNaN(countNum) || countNum < 0 || countNum > 99999) {
-      alert("Množství musí být číslo mezi 1 a 99 999.");
+      alert(t("components.createItem.alert.countInvalid"));
       return;
     }
 
@@ -38,7 +38,7 @@ export function CreateItem({ shopListId }) {
       setNewCount("");
     } catch (err) {
       // Handle error (e.g. show toast)
-      alert("Failed to add item. Please try again.");
+      alert(t("components.createItem.alert.addFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +86,9 @@ export function CreateItem({ shopListId }) {
                focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 
                whitespace-nowrap"
       >
-        {t("components.createItem.addButton")}
+        {isLoading
+          ? t("components.createItem.loading")
+          : t("components.createItem.addButton")}
       </button>
     </div>
   );

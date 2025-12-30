@@ -71,7 +71,7 @@ export function EditName({ name, shopListId, isOwner }) {
           </h3> */}
           <input
             type="text"
-            className="border p-1 rounded"
+            className="border p-1 rounded text-gray-900"
             value={newName}
             onClick={(e) => e.stopPropagation()}
             onChange={handleInputChange}

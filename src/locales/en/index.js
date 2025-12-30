@@ -6,13 +6,43 @@ export const enTranslations = {
       loadingUser: "Loading user session...",
       back: "Back",
       settings: "Settings",
+      filter: "Filter",
       language: "Language",
       theme: "Theme",
       done: "Done",
       pending: "Pending",
       showChart: "Show diagram",
+      theme: "theme",
+      dark: "dark",
+      light: "light",
     },
     components: {
+      itemForm: {
+        placeholder: {
+          name: "Item name",
+          count: "Quantity",
+        },
+        submit: "Save",
+        create: "Add",
+        cancel: "Cancel",
+        loading: "Saving...",
+        alert: {
+          nameRequired: "Please enter an item name.",
+        },
+      },
+      createItem: {
+        placeholder: {
+          name: "Item name",
+          count: "Quantity",
+        },
+        addButton: "Add",
+        loading: "Adding...",
+        alert: {
+          nameInvalid: "Name must be between 1 and 100 characters.",
+          countInvalid: "Quantity must be a number between 1 and 99,999.",
+          addFailed: "Failed to add item. Please try again.",
+        },
+      },
       invite: {
         title: "Invite New Member (Owner Only)",
         formAria: "Form to invite a new member to the shopping list",
@@ -52,6 +82,25 @@ export const enTranslations = {
         },
         addButton: "Add",
         loading: "Adding...",
+      },
+      itemRow: {
+        resolved: "done",
+        toggleResolved: "Mark as resolved/unresolved",
+        menu: {
+          open: "Open item menu",
+          edit: "Edit",
+          save: "Save",
+          cancel: "Cancel",
+          delete: "Delete",
+        },
+        editPlaceholder: {
+          name: "Item name",
+        },
+        confirmDelete: 'Really delete "{name}"?',
+        alert: {
+          updateFailed: "Failed to update item.",
+          deleteFailed: "Failed to delete item.",
+        },
       },
     },
     pages: {
