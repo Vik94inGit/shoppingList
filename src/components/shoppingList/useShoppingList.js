@@ -73,3 +73,13 @@ export const deleteMember = async (shopListId, memberId) => {
     }
   );
 };
+
+export const leaveList = async (shopListId, memberId) => {
+  console.log("Deleting member from list:", shopListId, "memberId:", memberId);
+  return authFetch(
+    `${API_BASE_URL}/ShoppingList/${shopListId}/members/${memberId}/leaveList`,
+    {
+      method: "DELETE",
+    }
+  );
+};

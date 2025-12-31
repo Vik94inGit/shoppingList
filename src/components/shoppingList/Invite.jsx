@@ -105,88 +105,57 @@ export function Invite({ dispatch, isOwner }) {
   };
 
   return (
-    <div className="mt-8 p-6 pb-10 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg mb-10">
-      {/* Header */}
-      <h4 className="text-xl font-bold text-blue-800 dark:text-gray-100 mb-5">
-        {t("components.invite.title")}
-      </h4>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+      {/* Optional title */}
+      {/* <h4 className="text-xl font-bold mb-5">Pozvat člena</h4> */}
 
-      {/* Status Message */}
       {status.type && (
         <div
-          className={`mb-5 p-4 rounded-xl text-sm font-medium transition-all ${
+          className={`mb-5 p-4 rounded-xl text-sm font-medium border ${
             status.type === "success"
-              ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800"
-              : "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
+              ? "bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800"
+              : "bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800"
           }`}
         >
           {status.text}
         </div>
       )}
 
-      {/* Form - Přidáno items-end pro zarovnání spodní hrany */}
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 gap-y-4 dark:text-red dark:bg-gray-10000 "
-        aria-label={t("components.invite.formAria")}
-      >
-        {/* Name Input */}
-        <div className="w-full flex-1 sm:flex-1">
-          <label
-            htmlFor="invite-name"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            {t("components.invite.fields.name")}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("components.invite.fields.name")}{" "}
+            <span className="text-gray-500">(volitelné)</span>
           </label>
           <input
             id="invite-name"
             type="text"
-            maxLength={30}
-            placeholder={t("components.invite.placeholders.name")}
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
-            className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-xl 
-                       bg-white dark:bg-gray-800 
-                       text-gray-900 dark:text-white 
-                       placeholder-gray-500 dark:placeholder-gray-400 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                       transition disabled:opacity-60"
-            required
+            placeholder={t("components.invite.placeholders.name")}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        {/* Email Input */}
-        <div className="w-full sm:flex-1">
-          <label
-            htmlFor="invite-email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1"
-          >
-            {t("components.invite.fields.email")}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("components.invite.fields.email")}{" "}
+            <span className="text-red-500">*</span>
           </label>
           <input
             id="invite-email"
             type="email"
-            maxLength={30}
-            placeholder={t("components.invite.placeholders.email")}
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-xl 
-                       bg-white dark:bg-gray-800 
-                       text-gray-900 dark:text-white 
-                       placeholder-gray-500 dark:placeholder-gray-400 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                       transition disabled:opacity-60"
-            required
+            placeholder={t("components.invite.placeholders.email")}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        {/* Submit Button - Odstraněno flex items-end div, tlačítko je nyní přímo v gridu/flexu */}
         <button
           type="submit"
-          className="w-full sm:w-auto px-8 py-3 h-[50px] bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed 
-                     text-white font-semibold rounded-xl shadow-md hover:shadow-lg 
-                     transition-all duration-200 
-                     focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+          className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg rounded-xl shadow-md hover:shadow-lg transition"
         >
           {t("components.invite.submit")}
         </button>

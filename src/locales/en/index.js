@@ -15,6 +15,10 @@ export const enTranslations = {
       theme: "theme",
       dark: "dark",
       light: "light",
+      edit: "Edit",
+    },
+    errors: {
+      leaveFailed: "Failed to leave the list. Please try again.",
     },
     components: {
       itemForm: {
@@ -104,6 +108,15 @@ export const enTranslations = {
       },
     },
     pages: {
+      register: {
+        title: "Create an account",
+        fields: {
+          name: "Username",
+          email: "Email",
+          password: "Password",
+          confirmPassword: "Confirm Password",
+        },
+      },
       shoppingList: {
         emptyMessage: "Shoppig list is empty now!",
         deleteConfirm:
@@ -120,11 +133,15 @@ export const enTranslations = {
           solved: "Solved only",
         },
         members: {
-          title: "Učastniky",
+          title: "Members",
           remove: "Remove",
           removeUserAria: "Remove {userName}",
           leave: "Leave",
           leaveListAria: "Leave this list",
+          confirmRemove:
+            "Are you sure you want to remove {{name}} from this shopping list?",
+          confirmLeave: "Are you sure you want to leave this shopping list?",
+          leave: "Leave List",
         },
         editMembers: "Edit members",
         resetList: "Reset list to default",

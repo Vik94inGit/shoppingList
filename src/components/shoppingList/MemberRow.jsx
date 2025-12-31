@@ -1,6 +1,7 @@
 // src/components/shoppingList/MemberRow.jsx
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ← Add this
 import PropTypes from "prop-types";
 import { actionTypes } from "../../context/ReducerHelper";
 import { useParams } from "react-router-dom";
@@ -11,8 +12,9 @@ import { EditMember } from "./EditMember";
 export function MemberRow({ currentUserId, member, ownerId, dispatch }) {
   const { shopListId } = useParams();
   const { actions } = useShoppingList();
-  const { removeMember, updateMember } = actions; // Přidáno updateMember z kontextu
+  const { removeMember, updateMember, leaveListById } = actions; // Přidáno updateMember z kontextu
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   // STAV PRO EDITACI
 
@@ -62,37 +64,42 @@ export function MemberRow({ currentUserId, member, ownerId, dispatch }) {
     }
   };
 
+  const handleLeaveList = async () => {
+    if (!isMe) return;
+
+    const confirmed = window.confirm(
+      t("pages.shoppingList.members.confirmLeave")
+    );
+
+    if (confirmed) {
+      try {
+        await leaveListById(shopListId, memberId); // memberId = currentUserId
+
+        // SUCCESS → redirect to home
+        navigate("/"); // or "/lists" if you have a dedicated page
+      } catch (err) {
+        console.error("Failed to leave list", err);
+        // Optional: show error toast
+        alert(t("errors.leaveFailed"));
+      }
+    }
+  };
+
   const role = isMemberOwner
-    ? { text: "Owner", color: "#d4af37" }
+    ? { text: "Owner", color: "bg-yellow-600" }
     : isMe
-    ? { text: "You", color: "#007bff" }
-    : { text: "Member", color: "#6c757d" };
+    ? { text: "You", color: "bg-blue-600" }
+    : { text: "Member", color: "bg-gray-600" };
 
   return (
     <div
       role="listitem"
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "10px 8px",
-        borderBottom: "1px dotted #dee2e6",
-        backgroundColor: "#8c939bff",
-        borderRadius: "6px",
-        margin: "2px 0",
-      }}
+      className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 
+                 border border-gray-200 dark:border-gray-700 rounded-xl 
+                 shadow-sm hover:shadow transition-shadow"
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
-        {/* EDITACE JMÉNA VS STATICKÝ TEXT */}
-
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Editable Name or Static Text */}
         {isEditing ? (
           <EditMember
             member={member}
@@ -101,110 +108,57 @@ export function MemberRow({ currentUserId, member, ownerId, dispatch }) {
             onClose={() => setIsEditing(false)}
           />
         ) : (
-          <strong
-            onClick={() => setIsEditing(true)}
-            style={{
-              color: "#212529",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              maxWidth: "120px",
-              display: "inline-block",
-            }}
+          <button
+            onClick={() => iAmOwner && !isMemberOwner && setIsEditing(true)}
+            className="font-semibold text-gray-900 dark:text-white truncate hover:text-blue-600 dark:hover:text-blue-400 
+                       transition-colors cursor-pointer disabled:cursor-default disabled:hover:text-inherit"
+            disabled={!iAmOwner || isMemberOwner}
+            title={iAmOwner && !isMemberOwner ? t("common.edit") : ""}
           >
             {userName}
-          </strong>
+          </button>
         )}
 
+        {/* Role Badge */}
         <span
-          style={{
-            backgroundColor: role.color,
-
-            color: "white",
-
-            fontSize: "11px",
-
-            fontWeight: "bold",
-
-            padding: "2px 6px",
-
-            borderRadius: "4px",
-          }}
+          className={`text-xs font-bold px-2.5 py-1 rounded-full text-white ${role.color}`}
         >
           {role.text}
         </span>
       </div>
 
-      {/* ACTION BUTTONS */}
-
-      <div style={{ display: "flex", gap: "6px" }}>
-        {/* EDIT TLAČÍTKO (Jen pro vlastníka u ostatních členů) */}
-
+      {/* Action Buttons */}
+      <div className="flex items-center gap-3">
+        {/* Edit Button (visible for owner on non-owners) */}
         {iAmOwner && !isMemberOwner && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            style={{
-              background: "none",
-
-              border: "none",
-
-              cursor: "pointer",
-
-              fontSize: "16px",
-            }}
+            className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 
+                       text-lg transition-colors scale-x-[-1] ml-1"
             title={t("common.edit")}
+            aria-label={t("common.edit")}
           >
             ✎
           </button>
         )}
 
-        {/* REMOVE TLAČÍTKO */}
-
+        {/* Remove Button (owner only, not self) */}
         {iAmOwner && !isMemberOwner && (
           <button
             onClick={handleRemoveOther}
-            style={{
-              backgroundColor: "#dc3545",
-
-              color: "white",
-
-              border: "none",
-
-              padding: "6px 10px",
-
-              borderRadius: "4px",
-
-              cursor: "pointer",
-
-              fontSize: "12px",
-            }}
+            className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium 
+                       px-4 py-2 rounded-lg transition-colors"
           >
-            {t("pages.shoppingList.members.remove")}
+            X
           </button>
         )}
 
-        {/* LEAVE TLAČÍTKO */}
-
+        {/* Leave List Button (for current user if not owner) */}
         {isMe && !isMemberOwner && (
           <button
-            onClick={() => {
-              /* handleLeaveList logic */
-            }}
-            style={{
-              backgroundColor: "#ffc107",
-
-              color: "black",
-
-              border: "none",
-
-              padding: "6px 10px",
-
-              borderRadius: "4px",
-
-              cursor: "pointer",
-
-              fontSize: "12px",
-            }}
+            onClick={handleLeaveList}
+            className="bg-amber-500 hover:bg-amber-600 text-black text-xs font-medium 
+                       px-4 py-2 rounded-lg transition-colors"
           >
             {t("pages.shoppingList.members.leave")}
           </button>

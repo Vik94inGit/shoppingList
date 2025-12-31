@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "../ThemeToggle.jsx";
 import { ChangeLanguage } from "../ChangeLanguage.jsx";
 import { ListDetailChart } from "../listChart.jsx";
+import { Invite } from "./Invite.jsx";
 
 const FilterOptions = ["All", "Unsolved", "Solved"];
 
@@ -293,26 +294,44 @@ export function ShoppingList() {
         {/* Modal: Členové */}
         {isMembersListVisible && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex  justify-center z-50 p-4 overflow-y-auto"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto"
             onClick={() => setIsMembersListVisible(false)}
           >
+            {/* Main modal card – now takes almost full height & width on mobile */}
             <div
-              className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-lg w-full shadow-2xl"
+              className="bg-gray-50 dark:bg-gray-900 w-full max-w-2xl max-h-[95vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between mb-6">
-                <h2 className="text-2xl font-bold dark:text-white">
+              {/* Sticky Header */}
+              <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-5 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {t("pages.shoppingList.membersTitle")}
                 </h2>
+                <button
+                  onClick={() => setIsMembersListVisible(false)}
+                  className="text-3xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
               </div>
-              <MemberList
-                members={members}
-                ownerId={ownerId}
-                currentUserId={currentUserId}
-                dispatch={dispatch}
-                shopListId={shopListId}
-                onClose={() => setIsMembersListVisible(false)}
-              />
+
+              {/* Scrollable Content – this is where magic happens */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+                {/* Members List */}
+                <div>
+                  <div className="space-y-3">
+                    <MemberList
+                      members={members}
+                      ownerId={ownerId}
+                      currentUserId={currentUserId}
+                      dispatch={dispatch}
+                      shopListId={shopListId}
+                      onClose={() => setIsMembersListVisible(false)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

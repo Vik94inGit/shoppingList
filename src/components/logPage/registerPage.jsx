@@ -1,5 +1,5 @@
 // src/pages/RegisterPage.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";

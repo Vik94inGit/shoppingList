@@ -22,6 +22,7 @@ import {
   addItemToList,
   addMemberToList,
   deleteMember,
+  leaveList,
 } from "../components/shoppingList/useShoppingList.js";
 
 const ShoppingListContext = createContext();
@@ -167,6 +168,18 @@ export function ShoppingListProvider({ children }) {
     }
   };
 
+  const leaveListById = async (shopListId, memberId) => {
+    try {
+      await leaveList(shopListId, memberId);
+      dispatch({
+        type: actionTypes.leaveList,
+        payload: { shopListId, memberId },
+      });
+    } catch (err) {
+      console.error("Failed to remove member", err);
+    }
+  };
+
   const addItem = async (shopListId, itemData) => {
     try {
       // Optimistic update: add temporarily to UI (optional, see note below)
@@ -213,12 +226,16 @@ export function ShoppingListProvider({ children }) {
         addItem,
         inviteMemberToList,
         removeMember,
+        leaveListById,
+        addMemberToList,
       },
     }),
     [
       lists,
       loading,
       error,
+      login,
+      logout,
       currentUser,
       createNewList,
       deleteListById,
@@ -226,6 +243,7 @@ export function ShoppingListProvider({ children }) {
       archiveListById,
       inviteMemberToList,
       addItem,
+      leaveListById,
       removeMember,
       addMemberToList,
     ]

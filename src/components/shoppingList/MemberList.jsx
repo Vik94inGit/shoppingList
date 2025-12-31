@@ -41,14 +41,6 @@ export function MemberList({
 
   return (
     <div className="space-y-6 relative">
-      <button
-        onClick={onClose}
-        className="absolute -top-16 -right-4 p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-        aria-label="Close"
-      >
-        <X size={20} />
-      </button>
-      {/* 1. INVITE COMPONENT */}
       <Invite dispatch={dispatch} isOwner={isOwner} userId={currentUserId} />
 
       <hr className="border-gray-200 dark:border-gray-700 my-6" />

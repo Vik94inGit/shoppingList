@@ -15,6 +15,10 @@ export const csTranslations = {
       theme: "Téma",
       dark: "tmava",
       light: "světla",
+      edit: "Upravit",
+    },
+    errors: {
+      leaveFailed: "Nepodařilo se opustit seznam. Zkuste to prosím znovu.",
     },
     components: {
       createList: {
@@ -103,6 +107,15 @@ export const csTranslations = {
       },
     },
     pages: {
+      register: {
+        title: "Vytvořit účet",
+        fields: {
+          name: "Uživatelské jméno",
+          email: "E-mail",
+          password: "Heslo",
+          confirmPassword: "Potvrzení hesla",
+        },
+      },
       shoppingList: {
         emptyMessage: "Zatím seznam je prázdný!",
         notFound: "Seznam nenalezen.",
@@ -115,6 +128,10 @@ export const csTranslations = {
           removeUserAria: "Odebrat {userName}",
           leave: "Opustit",
           leaveListAria: "Opustit tento seznam",
+          confirmRemove:
+            "Opravdu chcete odstranit uživatele {{name}} z tohoto nákupního seznamu?",
+          confirmLeave: "Opravdu chcete opustit tento nákupní seznam?",
+          leave: "Opustit seznam",
         },
         filters: {
           all: "Všechny položky",
