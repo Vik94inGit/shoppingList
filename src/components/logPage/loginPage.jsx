@@ -1,7 +1,8 @@
 // src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom"; // Add this import
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 import { useShoppingList } from "../../context/ShoppingListContext.jsx";
 export function LoginPage() {
@@ -133,9 +134,9 @@ export function LoginPage() {
 
         <p style={{ marginTop: "20px" }}>
           {t("pages.login.registerMessage1")}{" "}
-          <a href="/register" style={{ color: "#007bff" }}>
+          <Link to="/register" style={{ color: "#007bff" }}>
             {t("pages.login.registerMessage2")}
-          </a>
+          </Link>
           .
         </p>
       </div>
